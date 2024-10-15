@@ -10,6 +10,7 @@ RootPath = string.sub(CurrentWorkingPath, 0, string.len(CurrentWorkingPath) - st
 MakefilePath = path.join(RootPath, MakeFileRelativePath)
 BuildOutputPath = path.join(RootPath, "Build")
 SourcePath = path.join(RootPath, "Source")
+ExamplesPath = path.join(RootPath, "Examples")
 
 --------------------------------------------------------------
 -- Dump Info
@@ -21,6 +22,7 @@ Dump.PrintVar("RootPath", RootPath)
 Dump.PrintVar("MakefilePath", MakefilePath)
 Dump.PrintVar("BuildOutputPath", BuildOutputPath)
 Dump.PrintVar("SourcePath", SourcePath)
+Dump.PrintVar("ExamplesPath", ExamplesPath)
 Log.Info("------------------------------------------------------")
 
 --------------------------------------------------------------
@@ -54,3 +56,4 @@ group("")
 
 dofile("core.lua")
 dofile("os.lua")
+dofile("examples.lua")

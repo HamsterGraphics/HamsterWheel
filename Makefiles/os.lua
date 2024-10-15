@@ -6,6 +6,7 @@ project("OS")
 	Project.StaticRuntime("on")
 
 	defines {
+		"HG_EXPORT"
 	}
 
 	includedirs {
