@@ -73,8 +73,131 @@ TimeInfo* Time_GetInfo()
 static ConsoleInfo g_consoleInfo;
 
 ///////////////////////////////////////////////////////
+// Application
+///////////////////////////////////////////////////////
+static hg::IApplication* g_pApp;
+
+///////////////////////////////////////////////////////
+// Input
+///////////////////////////////////////////////////////
+static InputInfo g_inputInfo;
+bool Input_Init(InputInfo* pInfo)
+{
+	memset(pInfo->InputValue, 0, sizeof(pInfo->InputValue));
+	return true;
+}
+
+float Input_GetValue(InputKey key)
+{
+	return g_inputInfo.InputValue[key];
+}
+
+///////////////////////////////////////////////////////
 // Window
 ///////////////////////////////////////////////////////
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch (msg)
+	{
+	case WM_ACTIVATE:
+	{
+		(LOWORD(wParam) != WA_INACTIVE);
+		break;
+	}
+	case WM_SIZE:
+	{
+		uint32 newWidth = LOWORD(lParam);
+		uint32 newHeight = HIWORD(lParam);
+		break;
+	}
+	case WM_MOUSEMOVE:
+	{
+		g_inputInfo.InputValue[INPUT_MOUSE_X] = static_cast<float>(LOWORD(lParam));
+		g_inputInfo.InputValue[INPUT_MOUSE_Y] = static_cast<float>(HIWORD(lParam));
+		break;
+	}
+	case WM_MOUSEWHEEL:
+	{
+		g_inputInfo.InputValue[INPUT_MOUSE_WHEEL] = static_cast<float>(GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA);
+		break;
+	}
+	case WM_LBUTTONDOWN:
+	{
+		g_inputInfo.InputValue[INPUT_MOUSE_LB] = 1.f;
+		break;
+	}
+	case WM_LBUTTONUP:
+	{
+		g_inputInfo.InputValue[INPUT_MOUSE_LB] = 0.f;
+		break;
+	}
+	case WM_MBUTTONDOWN:
+	{
+		g_inputInfo.InputValue[INPUT_MOUSE_MB] = 1.f;
+		break;
+	}
+	case WM_MBUTTONUP:
+	{
+		g_inputInfo.InputValue[INPUT_MOUSE_MB] = 0.f;
+		break;
+	}
+	case WM_RBUTTONDOWN:
+	{
+		g_inputInfo.InputValue[INPUT_MOUSE_RB] = 1.f;
+		break;
+	}
+	case WM_RBUTTONUP:
+	{
+		g_inputInfo.InputValue[INPUT_MOUSE_RB] = 0.f;
+		break;
+	}
+	case WM_XBUTTONDOWN:
+	{
+		g_inputInfo.InputValue[INPUT_MOUSE_XB] = 1.f;
+		break;
+	}
+	case WM_XBUTTONUP:
+	{
+		g_inputInfo.InputValue[INPUT_MOUSE_XB] = 0.f;
+		break;
+	}
+	case WM_KEYDOWN:
+	case WM_SYSKEYDOWN:
+	case WM_KEYUP:
+	case WM_SYSKEYUP:
+	{
+		break;
+	}
+	case WM_CHAR:
+	{
+		break;
+	}
+	case WM_DESTROY:
+	case WM_CLOSE:
+	{
+		::PostQuitMessage(0);
+		break;
+	}
+	}
+
+	return ::DefWindowProc(hwnd, msg, wParam, lParam);
+}
+
+bool Window_Init()
+{
+	WNDCLASSW windowClass;
+	memset(&windowClass, 0, sizeof(windowClass));
+	windowClass.style = 0;
+	windowClass.lpfnWndProc = WindowProc;
+	windowClass.hInstance = (HINSTANCE)::GetModuleHandle(NULL);
+	windowClass.hIcon = ::LoadIcon(NULL, IDI_APPLICATION);
+	windowClass.hCursor = ::LoadCursor(NULL, IDC_ARROW);
+	windowClass.lpszClassName = HG_WINDOW_CLASS_NAME;
+	::RegisterClassW(&windowClass);
+
+	return true;
+}
+
 void Window_AdjustRect(const hg::AppSettings& appSettings, WindowInfo& windowInfo)
 {
 	windowInfo.WindowRect.X = appSettings.WindowPosX;
@@ -104,7 +227,9 @@ int AppMain(int argc, char** argv, hg::IApplication* pApp)
 {
 	UNUSED(argc);
 	UNUSED(argv);
+	g_pApp = pApp;
 
+	// Init application
 	auto& appSettings = pApp->GetSettings();
 	pApp->Init();
 
@@ -124,18 +249,20 @@ int AppMain(int argc, char** argv, hg::IApplication* pApp)
 	Power_UpdateStatus(&g_powerInfo);
 	Monitor_InitInfo(g_monitorInfo, g_monitorCount);
 	Time_Init(&g_timeInfo);
+	Input_Init(&g_inputInfo);
 	Window_Init();
 	
+	// Create application window
 	WindowInfo windowInfo;
 	memset(&windowInfo, 0, sizeof(windowInfo));
 	windowInfo.Name = pApp->GetName();
 	Window_AdjustRect(appSettings, windowInfo);
-
 	if (!appSettings.Faceless)
 	{
 		Window_Create(&windowInfo);
 	}
 
+	// Loop
 	int64 lastCounter = Time_QueryCounter();
 	bool quit = false;
 	while (!quit)
@@ -150,9 +277,11 @@ int AppMain(int argc, char** argv, hg::IApplication* pApp)
 		pApp->Render();
 	}
 
-	pApp->Shutdown();
-
+	// Shutdown subsystems
 	Console_Shutdown(&g_consoleInfo);
+
+	// Shutdown application
+	pApp->Shutdown();
 
 	return 0;
 }

@@ -11,6 +11,33 @@
 
 #include "Config.h"
 
+ ///////////////////////////////////////////////////////
+ // Input
+ ///////////////////////////////////////////////////////
+enum InputKey
+{
+	INPUT_MOUSE_X,
+	INPUT_MOUSE_Y,
+	INPUT_MOUSE_LB,
+	INPUT_MOUSE_MB,
+	INPUT_MOUSE_RB,
+	INPUT_MOUSE_XB,
+	INPUT_MOUSE_WHEEL,
+
+	MAX_INPUT_VALUE
+};
+
+typedef struct InputInfo
+{
+	float InputValue[MAX_INPUT_VALUE];
+} InputInfo;
+
+bool Input_Init(InputInfo* pInfo);
+HG_API float Input_GetValue(InputKey key);
+
+///////////////////////////////////////////////////////
+// Application
+///////////////////////////////////////////////////////
 namespace hg
 {
 
