@@ -11,6 +11,25 @@
 
 #include "Config.h"
 
+ ///////////////////////////////////////////////////////
+ // Input
+ ///////////////////////////////////////////////////////
+enum InputValue
+{
+	INPUT_MOUSE_X,
+	INPUT_MOUSE_Y,
+	INPUT_MOUSE_LB,
+	INPUT_MOUSE_MB,
+	INPUT_MOUSE_RB,
+	INPUT_MOUSE_XB,
+	INPUT_MOUSE_WHEEL,
+
+	MAX_INPUT_VALUE
+};
+
+///////////////////////////////////////////////////////
+// Application
+///////////////////////////////////////////////////////
 namespace hg
 {
 
@@ -37,6 +56,8 @@ public:
 
 	virtual const char* GetName() const = 0;
 	virtual AppSettings& GetSettings() { return m_settings; }
+
+	float InputValue[MAX_INPUT_VALUE];
 
 protected:
 	AppSettings m_settings;

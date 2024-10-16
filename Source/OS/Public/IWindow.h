@@ -9,10 +9,14 @@
 
 #include <Config.h>
 
+ ///////////////////////////////////////////////////////
+ // Windows Management
+ ///////////////////////////////////////////////////////
 typedef struct WindowInfo
 {
 	const char* Name;
 	void* Handle;
+	void* ParentHandle;
 	Rect WindowRect;
 
 	bool Hide : 1;
@@ -23,9 +27,6 @@ typedef struct WindowInfo
 	bool Padding : 3;
 } WindowInfo;
 
-///////////////////////////////////////////////////////
-// Windows Management
-///////////////////////////////////////////////////////
 bool Window_Init();
 bool Window_HandleMessages();
 HG_API void Window_Create(WindowInfo* pWindowDesc);
