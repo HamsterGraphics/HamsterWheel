@@ -11,17 +11,27 @@
 
 #include "WindowsUtils.h"
 
-LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    return ::DefWindowProcW(hwnd, message, wParam, lParam);
+    switch (message)
+    {
+    case WM_DESTROY:
+    case WM_CLOSE:
+    {
+        PostQuitMessage(0);
+        break;
+    }
+    }
+
+    return ::DefWindowProc(hwnd, message, wParam, lParam);
 }
 
-bool Window_InitSystem()
+bool Window_Init()
 {
 	WNDCLASSW windowClass;
 	memset(&windowClass, 0, sizeof(windowClass));
     windowClass.style = 0;
-    windowClass.lpfnWndProc = WinProc;
+    windowClass.lpfnWndProc = WindowProc;
     windowClass.hInstance = (HINSTANCE)::GetModuleHandle(NULL);
     windowClass.hIcon = ::LoadIcon(NULL, IDI_APPLICATION);
     windowClass.hCursor = ::LoadCursor(NULL, IDC_ARROW);
@@ -50,7 +60,7 @@ bool Window_HandleMessages()
     return quit;
 }
 
-void Window_Create(WindowDesc* pWindowDesc)
+void Window_Create(WindowInfo* pWindowDesc)
 {
     size_t charConverted = 0;
     WCHAR appName[256] = {};
@@ -80,4 +90,10 @@ void Window_Create(WindowDesc* pWindowDesc)
     {
         ::ShowWindow(hwnd, SW_HIDE);
     }
+}
+
+void Window_Destroy(WindowInfo* pWindowDesc)
+{
+    ::DestroyWindow((HWND)pWindowDesc->Handle);
+    pWindowDesc->Handle = NULL;
 }

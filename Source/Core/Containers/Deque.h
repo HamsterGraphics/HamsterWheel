@@ -1,6 +1,11 @@
-#pragma once
+/*
+ * Copyright (c) 2024-2025 HamsterGraphics
+ *
+ * https://github.com/HamsterGraphics/HamsterWheel
+ *
+ */
 
-#include "../Base/BasicTypes.h"
+#pragma once
 
 #include <deque>
 

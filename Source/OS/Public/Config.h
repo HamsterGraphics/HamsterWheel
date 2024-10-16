@@ -16,6 +16,8 @@
 #define HG_API API_IMPORT
 #endif
 
+#ifdef _WIN32
+
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -24,4 +26,16 @@
 #define NOMINMAX
 #endif
 
+#endif
+
 #define HG_WINDOW_CLASS_NAME L"HamsterGraphics"
+
+typedef struct Rect
+{
+	int32 X;
+	int32 Y;
+	int32 Width;
+	int32 Height;
+} Rect;
+
+#define MAX_MONITOR_COUNT 4

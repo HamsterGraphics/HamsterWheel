@@ -35,6 +35,30 @@ DRAMInfo* DRAM_GetInfo()
 }
 
 ///////////////////////////////////////////////////////
+// Power
+///////////////////////////////////////////////////////
+static PowerInfo g_powerInfo;
+PowerInfo* Power_GetInfo()
+{
+	return &g_powerInfo;
+}
+
+///////////////////////////////////////////////////////
+// Monitor
+///////////////////////////////////////////////////////
+static MonitorInfo g_monitorInfo[MAX_MONITOR_COUNT];
+static uint32 g_monitorCount;
+MonitorInfo* Monitor_GetInfo(uint32 monitorIndex)
+{
+	return &g_monitorInfo[monitorIndex];
+}
+
+uint32 Monitor_GetCount()
+{
+	return g_monitorCount;
+}
+
+///////////////////////////////////////////////////////
 // Time
 ///////////////////////////////////////////////////////
 static TimeInfo g_timeInfo;
@@ -44,20 +68,32 @@ TimeInfo* Time_GetInfo()
 }
 
 ///////////////////////////////////////////////////////
+// Console
+///////////////////////////////////////////////////////
+static ConsoleInfo g_consoleInfo;
+
+///////////////////////////////////////////////////////
 // Window
 ///////////////////////////////////////////////////////
-void Window_AdjustRect(const hg::AppSettings& appSettings, WindowDesc& windowDesc)
+void Window_AdjustRect(const hg::AppSettings& appSettings, WindowInfo& windowInfo)
 {
-	windowDesc.WindowRect.X = appSettings.WindowPosX;
-	windowDesc.WindowRect.Y = appSettings.WindowPosY;
-	windowDesc.WindowRect.Width = appSettings.WindowWidth;
-	windowDesc.WindowRect.Height = appSettings.WindowHeight;
+	windowInfo.WindowRect.X = appSettings.WindowPosX;
+	windowInfo.WindowRect.Y = appSettings.WindowPosY;
+	windowInfo.WindowRect.Width = appSettings.WindowWidth;
+	windowInfo.WindowRect.Height = appSettings.WindowHeight;
 
-	if (windowDesc.WindowRect.Width <= 0 ||
-		windowDesc.WindowRect.Height <= 0)
+	if (windowInfo.WindowRect.Width <= 0 ||
+		windowInfo.WindowRect.Height <= 0)
 	{
-		windowDesc.WindowRect.Width = 960;
-		windowDesc.WindowRect.Height = 540;
+		auto* pMonitorInfo = Monitor_GetInfo(0);
+		int resolutionWidth = pMonitorInfo->WorkRect.Width;
+		int resolutionHeight = pMonitorInfo->WorkRect.Height;
+
+		constexpr float visibleRate = 0.5f;
+		windowInfo.WindowRect.Width = static_cast<int>(resolutionWidth * visibleRate);
+		windowInfo.WindowRect.Height = static_cast<int>(resolutionHeight * visibleRate);
+		windowInfo.WindowRect.X = (resolutionWidth - windowInfo.WindowRect.Width) / 2;
+		windowInfo.WindowRect.Y = (resolutionHeight - windowInfo.WindowRect.Height) / 2;
 	}
 }
 
@@ -69,23 +105,35 @@ int AppMain(int argc, char** argv, hg::IApplication* pApp)
 	UNUSED(argc);
 	UNUSED(argv);
 
-	CPU_InitInfo(&g_cpuInfo);
-	DRAM_InitInfo(&g_dramInfo);
-	Time_Init(&g_timeInfo);
-
-	Window_InitSystem();
-
+	auto& appSettings = pApp->GetSettings();
 	pApp->Init();
 
-	auto& appSettings = pApp->GetSettings();
-	WindowDesc windowDesc;
-	memset(&windowDesc, 0, sizeof(windowDesc));
-	windowDesc.Name = pApp->GetName();
-	Window_AdjustRect(appSettings, windowDesc);
+	// Init subsystems
+	Console_Init(&g_consoleInfo);
+	if (!appSettings.EnableConsole)
+	{
+		Console_Shutdown(&g_consoleInfo);
+	}
+	else
+	{
+		Console_Show(&g_consoleInfo);
+	}
+
+	CPU_InitInfo(&g_cpuInfo);
+	DRAM_InitInfo(&g_dramInfo);
+	Power_UpdateStatus(&g_powerInfo);
+	Monitor_InitInfo(g_monitorInfo, g_monitorCount);
+	Time_Init(&g_timeInfo);
+	Window_Init();
+	
+	WindowInfo windowInfo;
+	memset(&windowInfo, 0, sizeof(windowInfo));
+	windowInfo.Name = pApp->GetName();
+	Window_AdjustRect(appSettings, windowInfo);
 
 	if (!appSettings.Faceless)
 	{
-		Window_Create(&windowDesc);
+		Window_Create(&windowInfo);
 	}
 
 	int64 lastCounter = Time_QueryCounter();
@@ -103,6 +151,8 @@ int AppMain(int argc, char** argv, hg::IApplication* pApp)
 	}
 
 	pApp->Shutdown();
+
+	Console_Shutdown(&g_consoleInfo);
 
 	return 0;
 }
