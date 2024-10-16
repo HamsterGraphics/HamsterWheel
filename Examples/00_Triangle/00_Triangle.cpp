@@ -5,6 +5,7 @@ class TriangleApp : public hg::IApplication
 public:
 	virtual bool Init() override
 	{
+		m_settings.EnableConsole = true;
 		return true;
 	}
 

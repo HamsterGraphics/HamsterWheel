@@ -4,6 +4,7 @@ project("OS")
 	Project.CppLanguage()
 	Project.Location(BuildOutputPath)
 	Project.StaticRuntime("on")
+	dependson("Core")
 
 	defines {
 		"HG_EXPORT"
@@ -22,6 +23,10 @@ project("OS")
 	vpaths {
 		["Public"] = path.join(SourcePath, "OS/Public/**.*"),
 		["Private"] = path.join(SourcePath, "OS/Private/"..PlatformName.."/**.*")
+	}
+
+	links {
+		"Core"
 	}
 
 	Project.CommonSettings()

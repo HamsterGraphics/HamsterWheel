@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "CompilerDefines.h"
+#include <Base/CompilerDefines.h>
 
 #ifdef _MSC_VER
 #define API_EXPORT __declspec(dllexport)

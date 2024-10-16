@@ -7,6 +7,7 @@
 
 #include <IOperatingSystem.h>
 
+#include <Base/TypeTraits.h>
 #include <Containers/Bitset.h>
 
 #include "WindowsUtils.h"
@@ -16,9 +17,9 @@
 #include <cstring>
 #include <memory>
 
- ///////////////////////////////////////////////////////////////////////////////////
- // Forward Declaration
- ///////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////
+// Forward Declaration
+///////////////////////////////////////////////////////////////////////////////////
 uint32 CountSetBits(CPUInfo* pInfo, ULONG_PTR bitMask);
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -193,6 +194,96 @@ bool DRAM_InitInfo(DRAMInfo* pInfo)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
+// Power
+///////////////////////////////////////////////////////////////////////////////////
+bool Power_UpdateStatus(PowerInfo* pInfo)
+{
+	static SYSTEM_POWER_STATUS status;
+	BOOL result = ::GetSystemPowerStatus(&status);
+
+	pInfo->IsACMode = status.ACLineStatus == 1;
+	pInfo->IsBatteryMode = status.ACLineStatus == 0;
+
+	if (pInfo->IsBatteryMode)
+	{
+		pInfo->BatteryLifePercent = status.BatteryLifePercent / 100.0f;
+	}
+
+	return result != 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+// Monitor
+///////////////////////////////////////////////////////////////////////////////////
+static BOOL CALLBACK MonitorCallback(HMONITOR monitorHandle, HDC pDeviceContext, LPRECT pRect, LPARAM pParam)
+{
+	UNUSED(pDeviceContext);
+	UNUSED(pRect);
+
+	MONITORINFOEXW info;
+	info.cbSize = sizeof(info);
+	::GetMonitorInfoW(monitorHandle, &info);
+
+	auto* pMonitor = reinterpret_cast<MonitorInfo*>(pParam);
+	if (wcscmp(info.szDevice, pMonitor->AdapterName) == 0)
+	{
+		pMonitor->MonitorRect.X = static_cast<int32>(info.rcMonitor.left);
+		pMonitor->MonitorRect.Y = static_cast<int32>(info.rcMonitor.top);
+		pMonitor->MonitorRect.Width = static_cast<int32>(info.rcMonitor.right) - pMonitor->MonitorRect.X;
+		pMonitor->MonitorRect.Height = static_cast<int32>(info.rcMonitor.bottom) - pMonitor->MonitorRect.Y;
+
+		pMonitor->WorkRect.X = static_cast<int32>(info.rcWork.left);
+		pMonitor->WorkRect.Y = static_cast<int32>(info.rcWork.top);
+		pMonitor->WorkRect.Width = static_cast<int32>(info.rcWork.right) - pMonitor->WorkRect.X;
+		pMonitor->WorkRect.Height = static_cast<int32>(info.rcWork.bottom) - pMonitor->WorkRect.Y;
+	}
+
+	return TRUE;
+}
+
+bool Monitor_InitInfo(MonitorInfo* pInfo, uint32& monitorCount)
+{
+	monitorCount = 0;
+
+	DISPLAY_DEVICEW adapter;
+	adapter.cb = sizeof(adapter);
+
+	int adapterIndex = 0;
+	while (::EnumDisplayDevicesW(NULL, adapterIndex++, &adapter, 0))
+	{
+		if (!adapter.StateFlags & DISPLAY_DEVICE_ACTIVE)
+		{
+			continue;
+		}
+
+		int32 displayIndex = 0;
+		DISPLAY_DEVICEW display;
+		display.cb = sizeof(display);
+		while (::EnumDisplayDevicesW(adapter.DeviceName, displayIndex++, &display, 0))
+		{
+			HDC dc;
+			dc = ::CreateDCW(L"DISPLAY", adapter.DeviceName, NULL, NULL);
+
+			auto& monitorInfo = pInfo[monitorCount];
+			monitorInfo.Index = monitorCount++;
+
+			wcsncpy_s(monitorInfo.DisplayName, display.DeviceName, COUNTOF(display.DeviceName));
+			wcsncpy_s(monitorInfo.AdapterName, adapter.DeviceName, COUNTOF(adapter.DeviceName));
+			monitorInfo.PhyscialWidth = ::GetDeviceCaps(dc, HORZSIZE);
+			monitorInfo.PhyscialHeight = ::GetDeviceCaps(dc, VERTSIZE);
+			monitorInfo.DPI[0] = static_cast<uint32>(::GetDeviceCaps(dc, LOGPIXELSX));
+			monitorInfo.DPI[1] = static_cast<uint32>(::GetDeviceCaps(dc, LOGPIXELSY));
+
+			::EnumDisplayMonitors(NULL, NULL, MonitorCallback, (LPARAM)(&monitorInfo));
+
+			::DeleteDC(dc);
+		}
+	}
+
+	return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////////
 // Time
 ///////////////////////////////////////////////////////////////////////////////////
 bool Time_Init(TimeInfo* pInfo)
@@ -209,6 +300,31 @@ int64 Time_QueryCounter()
 	LARGE_INTEGER counter;
 	::QueryPerformanceCounter(&counter);
 	return counter.QuadPart;
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+// Console
+///////////////////////////////////////////////////////////////////////////////////
+bool Console_Init(ConsoleInfo* pInfo)
+{
+	pInfo->OutputHandle = ::GetStdHandle(STD_OUTPUT_HANDLE);
+	pInfo->WindowHandle = ::GetConsoleWindow();
+	return true;
+}
+
+void Console_Shutdown(ConsoleInfo* pInfo)
+{
+	::CloseHandle((HANDLE)pInfo->OutputHandle);
+}
+
+void Console_Show(ConsoleInfo* pInfo)
+{
+	::ShowWindow((HWND)pInfo->WindowHandle, SW_SHOW);
+}
+
+void Console_Hide(ConsoleInfo* pInfo)
+{
+	::ShowWindow((HWND)pInfo->WindowHandle, SW_HIDE);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////

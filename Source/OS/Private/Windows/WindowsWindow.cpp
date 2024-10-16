@@ -11,26 +11,6 @@
 
 #include "WindowsUtils.h"
 
-LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-    return ::DefWindowProcW(hwnd, message, wParam, lParam);
-}
-
-bool Window_InitSystem()
-{
-	WNDCLASSW windowClass;
-	memset(&windowClass, 0, sizeof(windowClass));
-    windowClass.style = 0;
-    windowClass.lpfnWndProc = WinProc;
-    windowClass.hInstance = (HINSTANCE)::GetModuleHandle(NULL);
-    windowClass.hIcon = ::LoadIcon(NULL, IDI_APPLICATION);
-    windowClass.hCursor = ::LoadCursor(NULL, IDC_ARROW);
-    windowClass.lpszClassName = HG_WINDOW_CLASS_NAME;
-    ::RegisterClassW(&windowClass);
-
-    return true;
-}
-
 bool Window_HandleMessages()
 {
     MSG msg;
@@ -50,7 +30,7 @@ bool Window_HandleMessages()
     return quit;
 }
 
-void Window_Create(WindowDesc* pWindowDesc)
+void Window_Create(WindowInfo* pWindowDesc)
 {
     size_t charConverted = 0;
     WCHAR appName[256] = {};
@@ -58,7 +38,8 @@ void Window_Create(WindowDesc* pWindowDesc)
 
     auto& windowRect = pWindowDesc->WindowRect;
     HWND hwnd = ::CreateWindowW(HG_WINDOW_CLASS_NAME, appName, WS_OVERLAPPEDWINDOW,
-        windowRect.X, windowRect.Y, windowRect.Width, windowRect.Height, NULL, NULL, (HINSTANCE)GetModuleHandle(NULL), 0);
+        windowRect.X, windowRect.Y, windowRect.Width, windowRect.Height,
+        (HWND)pWindowDesc->ParentHandle, NULL, (HINSTANCE)GetModuleHandle(NULL), 0);
     pWindowDesc->Handle = hwnd;
 
     if (!pWindowDesc->Hide)
@@ -80,4 +61,10 @@ void Window_Create(WindowDesc* pWindowDesc)
     {
         ::ShowWindow(hwnd, SW_HIDE);
     }
+}
+
+void Window_Destroy(WindowInfo* pWindowDesc)
+{
+    ::DestroyWindow((HWND)pWindowDesc->Handle);
+    pWindowDesc->Handle = NULL;
 }

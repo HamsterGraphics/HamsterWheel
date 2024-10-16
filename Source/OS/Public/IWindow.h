@@ -9,18 +9,14 @@
 
 #include <Config.h>
 
-typedef struct Rect
-{
-	int32 X;
-	int32 Y;
-	int32 Width;
-	int32 Height;
-} Rect;
-
-typedef struct WindowDesc
+ ///////////////////////////////////////////////////////
+ // Windows Management
+ ///////////////////////////////////////////////////////
+typedef struct WindowInfo
 {
 	const char* Name;
 	void* Handle;
+	void* ParentHandle;
 	Rect WindowRect;
 
 	bool Hide : 1;
@@ -28,17 +24,10 @@ typedef struct WindowDesc
 	bool Minimized : 1;
 	bool FullScreen : 1;
 	bool Borderless : 1;
-} WindowDesc;
+	bool Padding : 3;
+} WindowInfo;
 
-typedef struct MonitorDesc
-{
-	Rect MonitorRect;
-} MonitorDesc;
-
-
-///////////////////////////////////////////////////////
-// Windows Management
-///////////////////////////////////////////////////////
-bool Window_InitSystem();
+bool Window_Init();
 bool Window_HandleMessages();
-HG_API void Window_Create(WindowDesc* pWindowDesc);
+HG_API void Window_Create(WindowInfo* pWindowDesc);
+HG_API void Window_Destroy(WindowInfo* pWindowDesc);

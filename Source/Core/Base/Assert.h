@@ -7,12 +7,6 @@
 
 #pragma once
 
-#include <list>
+#include <cassert>
 
-namespace hg
-{
-
-template<typename T>
-using List = std::list<T>;
-
-}
+#define Assert(expression, ...) assert(expression)
