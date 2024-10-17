@@ -143,3 +143,33 @@ bool Console_Init(ConsoleInfo* pInfo);
 void Console_Shutdown(ConsoleInfo* pInfo);
 HG_API void Console_Show(ConsoleInfo* pInfo);
 HG_API void Console_Hide(ConsoleInfo* pInfo);
+
+///////////////////////////////////////////////////////////////////////////////////
+// Log
+///////////////////////////////////////////////////////////////////////////////////
+typedef struct LogInfo
+{
+} LogInfo;
+HG_API bool Log_Init(LogInfo* pInfo);
+
+///////////////////////////////////////////////////////////////////////////////////
+// Thread
+///////////////////////////////////////////////////////////////////////////////////
+typedef void (*ThreadFunction)(void*);
+typedef struct ThreadInfo
+{
+	char ThreadName[MAX_THREAD_NAME_LENGTH];
+	void* ThreadHandle;
+	void* Data;
+	ThreadFunction ThreadMain;
+} ThreadInfo;
+
+bool Thread_Init();
+HG_API bool Thread_IsInMainThread();
+HG_API uint32 Thread_GetCurrentID();
+HG_API const char* Thread_GetCurrentName();
+HG_API void Thread_SetCurrentName(const char* pName);
+HG_API void Thread_Sleep(uint32 seconds);
+HG_API bool Thread_Create(ThreadInfo* pInfo);
+HG_API void Thread_Join(ThreadInfo* pInfo);
+HG_API void Thread_Detach(ThreadInfo* pInfo);

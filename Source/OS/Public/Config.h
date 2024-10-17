@@ -39,3 +39,4 @@ typedef struct Rect
 } Rect;
 
 #define MAX_MONITOR_COUNT 4
+#define MAX_THREAD_NAME_LENGTH 32

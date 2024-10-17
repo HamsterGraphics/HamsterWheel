@@ -73,6 +73,31 @@ TimeInfo* Time_GetInfo()
 static ConsoleInfo g_consoleInfo;
 
 ///////////////////////////////////////////////////////
+// Log
+///////////////////////////////////////////////////////
+static LogInfo g_logInfo;
+bool Log_Init(LogInfo* pInfo)
+{
+	return true;
+}
+
+///////////////////////////////////////////////////////
+// Thread
+///////////////////////////////////////////////////////
+static ThreadInfo g_threadInfo;
+static uint32 g_mainThreadID;
+bool Thread_Init()
+{
+	g_mainThreadID = Thread_GetCurrentID();
+	return true;
+}
+
+bool Thread_IsInMainThread()
+{
+	return Thread_GetCurrentID() == g_mainThreadID;
+}
+
+///////////////////////////////////////////////////////
 // Application
 ///////////////////////////////////////////////////////
 static hg::IApplication* g_pApp;
@@ -234,6 +259,7 @@ int AppMain(int argc, char** argv, hg::IApplication* pApp)
 	pApp->Init();
 
 	// Init subsystems
+	Thread_Init();
 	Console_Init(&g_consoleInfo);
 	if (!appSettings.EnableConsole)
 	{
@@ -243,6 +269,7 @@ int AppMain(int argc, char** argv, hg::IApplication* pApp)
 	{
 		Console_Show(&g_consoleInfo);
 	}
+	Log_Init(&g_logInfo);
 
 	CPU_InitInfo(&g_cpuInfo);
 	DRAM_InitInfo(&g_dramInfo);
