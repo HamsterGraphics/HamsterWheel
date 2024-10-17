@@ -20,5 +20,10 @@
 #define API_IMPORT
 #endif
 
+#ifdef __cplusplus
 #define C_ABI extern "C"
-#define CALLDECL __cdecl
+#else
+#define C_ABI
+#endif
+
+#define HG_CALLDECL __cdecl

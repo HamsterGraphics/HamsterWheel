@@ -11,9 +11,9 @@
 #include <Base/BasicTypes.h>
 
 #ifdef HG_EXPORT
-#define HG_API API_EXPORT
+#define HG_OS_API API_EXPORT
 #else
-#define HG_API API_IMPORT
+#define HG_OS_API API_IMPORT
 #endif
 
 #ifdef _WIN32

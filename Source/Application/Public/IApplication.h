@@ -8,11 +8,12 @@
 #pragma once
 
 #include <OSConfig.h>
+#define HG_APP_API HG_OS_API
 
  ///////////////////////////////////////////////////////
  // Input
  ///////////////////////////////////////////////////////
-enum InputKey
+typedef enum InputKey
 {
 	INPUT_MOUSE_X,
 	INPUT_MOUSE_Y,
@@ -23,7 +24,7 @@ enum InputKey
 	INPUT_MOUSE_WHEEL,
 
 	MAX_INPUT_VALUE
-};
+} InputKey;
 
 typedef struct InputInfo
 {
@@ -31,7 +32,7 @@ typedef struct InputInfo
 } InputInfo;
 
 bool Input_Init(InputInfo* pInfo);
-HG_API float Input_GetValue(InputKey key);
+C_ABI HG_APP_API float HG_CALLDECL Input_GetValue(InputKey key);
 
 ///////////////////////////////////////////////////////
 // Application
@@ -52,7 +53,7 @@ typedef struct AppSettings
 	bool Padding : 6;
 } AppSettings;
 
-class HG_API IApplication
+class HG_APP_API IApplication
 {
 public:
 	virtual bool Init() = 0;

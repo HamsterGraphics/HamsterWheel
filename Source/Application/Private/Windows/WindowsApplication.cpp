@@ -252,10 +252,8 @@ int AppMain(int argc, char** argv, hg::IApplication* pApp)
 	UNUSED(argv);
 	g_pApp = pApp;
 
-	// Init application
 	auto& appSettings = pApp->GetSettings();
-	pApp->Init();
-
+	
 	// Init subsystems
 	Thread_Init();
 	Console_Init(&g_consoleInfo);
@@ -277,6 +275,9 @@ int AppMain(int argc, char** argv, hg::IApplication* pApp)
 	Input_Init(&g_inputInfo);
 	Window_Init();
 	
+	// Init application
+	pApp->Init();
+
 	// Create application window
 	WindowInfo windowInfo;
 	memset(&windowInfo, 0, sizeof(windowInfo));

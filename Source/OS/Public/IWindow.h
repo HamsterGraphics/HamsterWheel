@@ -29,5 +29,5 @@ typedef struct WindowInfo
 
 bool Window_Init();
 bool Window_HandleMessages();
-HG_API void Window_Create(WindowInfo* pWindowDesc);
-HG_API void Window_Destroy(WindowInfo* pWindowDesc);
+C_ABI HG_OS_API void HG_CALLDECL Window_Create(WindowInfo* pWindowDesc);
+C_ABI HG_OS_API void HG_CALLDECL Window_Destroy(WindowInfo* pWindowDesc);
