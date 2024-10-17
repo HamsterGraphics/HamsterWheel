@@ -7,25 +7,26 @@ A fundamental framework helps to create graphics application.
   * Core
   
   * Graphics
+    
+    * D3D12
   
   * OS
     
-    * Application
-      
-      * Entry Point
-    
     * Hardware Info
-      
-      * CPU
-      
-      * DRAM
     
-    * Input
-      
-      * Mouse
-      
-      * Keyboard
-      
-      * Joystick
+    * Thread
+    
+    * File System
+    
+    * Input Management
     
     * Windows Management
+
+* Application Framework Layer
+  
+  * Links internal modules
+
+* Applications
+  
+  * Links Application Framework
+  * Links external modules such as plugins
