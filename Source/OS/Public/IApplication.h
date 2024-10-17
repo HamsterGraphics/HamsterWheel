@@ -65,6 +65,8 @@ public:
 	virtual const char* GetName() const = 0;
 	virtual AppSettings& GetSettings() { return m_settings; }
 
+	float InputValue[MAX_INPUT_VALUE];
+
 protected:
 	AppSettings m_settings;
 };
