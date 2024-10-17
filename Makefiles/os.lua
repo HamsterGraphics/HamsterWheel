@@ -4,7 +4,6 @@ project("OS")
 	Project.CppLanguage()
 	Project.Location(BuildOutputPath)
 	Project.StaticRuntime("on")
-	dependson("Core")
 
 	defines {
 		"HG_EXPORT"
@@ -26,7 +25,6 @@ project("OS")
 	}
 
 	links {
-		"Core"
 	}
 
 	Project.CommonSettings()

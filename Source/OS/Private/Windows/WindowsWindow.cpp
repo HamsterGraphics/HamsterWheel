@@ -9,7 +9,9 @@
 
 #include <Base/TypeTraits.h>
 
-#include "WindowsUtils.h"
+#include <windows.h>
+
+#include <cstdlib>
 
 bool Window_HandleMessages()
 {

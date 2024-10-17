@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "Config.h"
+#include "OSConfig.h"
 
 #ifdef _WIN32
 #include <windows.h>

@@ -11,8 +11,6 @@
 
 #include <Math/Math.h>
 
-#include "WindowsUtils.h"
-
 #include <cstring>
 #include <memory>
 
