@@ -2,7 +2,7 @@ local function MakeExample(exampleFolder)
 	local exampleName = path.getbasename(exampleFolder)
 	project(exampleName)
 		kind("ConsoleApp")
-		dependson { "OS" }
+		dependson { "Application" }
 
 		Project.CppLanguage()
 		Project.Location(BuildOutputPath)
@@ -16,10 +16,12 @@ local function MakeExample(exampleFolder)
 		includedirs {
 			path.join(SourcePath, "Core"),
 			path.join(SourcePath, "OS/Public"),
+			path.join(SourcePath, "Graphics/Public"),
+			path.join(SourcePath, "Application/Public"),
 		}
 
 		links {
-			"OS"
+			"Application"
 		}
 end
 

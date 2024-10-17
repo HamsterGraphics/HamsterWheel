@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <Config.h>
+#include <OSConfig.h>
 
  ///////////////////////////////////////////////////////
  // Windows Management

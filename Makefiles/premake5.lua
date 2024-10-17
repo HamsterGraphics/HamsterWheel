@@ -4,6 +4,7 @@ dofile("utils.lua")
 -- Path
 --------------------------------------------------------------
 PlatformName = os.getenv("PLATFORM_NAME")
+BackendName = "D3D12"
 CurrentWorkingPath = os.getcwd()
 MakeFileRelativePath = "Makefiles"
 RootPath = string.sub(CurrentWorkingPath, 0, string.len(CurrentWorkingPath) - string.len(MakeFileRelativePath) - 1)
@@ -54,6 +55,11 @@ group("Build")
 dofile("make.lua")
 group("")
 
+group("Modules")
 dofile("core.lua")
 dofile("os.lua")
+dofile("graphics.lua")
+group("")
+
+dofile("application.lua")
 dofile("examples.lua")

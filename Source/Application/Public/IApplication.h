@@ -7,9 +7,7 @@
 
 #pragma once
 
-#include <Delegates/MulticastDelegate.hpp>
-
-#include "Config.h"
+#include <OSConfig.h>
 
  ///////////////////////////////////////////////////////
  // Input

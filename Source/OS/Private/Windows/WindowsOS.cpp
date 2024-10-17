@@ -10,7 +10,7 @@
 #include <Base/TypeTraits.h>
 #include <Containers/Bitset.h>
 
-#include "WindowsUtils.h"
+#include <windows.h>
 
 #include <intrin.h>
 
