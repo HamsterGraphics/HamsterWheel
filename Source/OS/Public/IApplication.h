@@ -14,7 +14,7 @@
  ///////////////////////////////////////////////////////
  // Input
  ///////////////////////////////////////////////////////
-enum InputValue
+enum InputKey
 {
 	INPUT_MOUSE_X,
 	INPUT_MOUSE_Y,
@@ -26,6 +26,14 @@ enum InputValue
 
 	MAX_INPUT_VALUE
 };
+
+typedef struct InputInfo
+{
+	float InputValue[MAX_INPUT_VALUE];
+} InputInfo;
+
+bool Input_Init(InputInfo* pInfo);
+HG_API float Input_GetValue(InputKey key);
 
 ///////////////////////////////////////////////////////
 // Application

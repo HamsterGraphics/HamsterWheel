@@ -17,11 +17,6 @@
 #include <memory>
 
 ///////////////////////////////////////////////////////
-// Application
-///////////////////////////////////////////////////////
-static hg::IApplication* g_pApp;
-
-///////////////////////////////////////////////////////
 // CPU
 ///////////////////////////////////////////////////////
 static CPUInfo g_cpuInfo;
@@ -78,6 +73,51 @@ TimeInfo* Time_GetInfo()
 static ConsoleInfo g_consoleInfo;
 
 ///////////////////////////////////////////////////////
+// Log
+///////////////////////////////////////////////////////
+static LogInfo g_logInfo;
+bool Log_Init(LogInfo* pInfo)
+{
+	return true;
+}
+
+///////////////////////////////////////////////////////
+// Thread
+///////////////////////////////////////////////////////
+static ThreadInfo g_threadInfo;
+static uint32 g_mainThreadID;
+bool Thread_Init()
+{
+	g_mainThreadID = Thread_GetCurrentID();
+	return true;
+}
+
+bool Thread_IsInMainThread()
+{
+	return Thread_GetCurrentID() == g_mainThreadID;
+}
+
+///////////////////////////////////////////////////////
+// Application
+///////////////////////////////////////////////////////
+static hg::IApplication* g_pApp;
+
+///////////////////////////////////////////////////////
+// Input
+///////////////////////////////////////////////////////
+static InputInfo g_inputInfo;
+bool Input_Init(InputInfo* pInfo)
+{
+	memset(pInfo->InputValue, 0, sizeof(pInfo->InputValue));
+	return true;
+}
+
+float Input_GetValue(InputKey key)
+{
+	return g_inputInfo.InputValue[key];
+}
+
+///////////////////////////////////////////////////////
 // Window
 ///////////////////////////////////////////////////////
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -97,53 +137,53 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	}
 	case WM_MOUSEMOVE:
 	{
-		g_pApp->InputValue[INPUT_MOUSE_X] = static_cast<float>(LOWORD(lParam));
-		g_pApp->InputValue[INPUT_MOUSE_Y] = static_cast<float>(HIWORD(lParam));
+		g_inputInfo.InputValue[INPUT_MOUSE_X] = static_cast<float>(LOWORD(lParam));
+		g_inputInfo.InputValue[INPUT_MOUSE_Y] = static_cast<float>(HIWORD(lParam));
 		break;
 	}
 	case WM_MOUSEWHEEL:
 	{
-		g_pApp->InputValue[INPUT_MOUSE_WHEEL] = static_cast<float>(GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA);
+		g_inputInfo.InputValue[INPUT_MOUSE_WHEEL] = static_cast<float>(GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA);
 		break;
 	}
 	case WM_LBUTTONDOWN:
 	{
-		g_pApp->InputValue[INPUT_MOUSE_LB] = 1.f;
+		g_inputInfo.InputValue[INPUT_MOUSE_LB] = 1.f;
 		break;
 	}
 	case WM_LBUTTONUP:
 	{
-		g_pApp->InputValue[INPUT_MOUSE_LB] = 0.f;
+		g_inputInfo.InputValue[INPUT_MOUSE_LB] = 0.f;
 		break;
 	}
 	case WM_MBUTTONDOWN:
 	{
-		g_pApp->InputValue[INPUT_MOUSE_MB] = 1.f;
+		g_inputInfo.InputValue[INPUT_MOUSE_MB] = 1.f;
 		break;
 	}
 	case WM_MBUTTONUP:
 	{
-		g_pApp->InputValue[INPUT_MOUSE_MB] = 0.f;
+		g_inputInfo.InputValue[INPUT_MOUSE_MB] = 0.f;
 		break;
 	}
 	case WM_RBUTTONDOWN:
 	{
-		g_pApp->InputValue[INPUT_MOUSE_RB] = 1.f;
+		g_inputInfo.InputValue[INPUT_MOUSE_RB] = 1.f;
 		break;
 	}
 	case WM_RBUTTONUP:
 	{
-		g_pApp->InputValue[INPUT_MOUSE_RB] = 0.f;
+		g_inputInfo.InputValue[INPUT_MOUSE_RB] = 0.f;
 		break;
 	}
 	case WM_XBUTTONDOWN:
 	{
-		g_pApp->InputValue[INPUT_MOUSE_XB] = 1.f;
+		g_inputInfo.InputValue[INPUT_MOUSE_XB] = 1.f;
 		break;
 	}
 	case WM_XBUTTONUP:
 	{
-		g_pApp->InputValue[INPUT_MOUSE_XB] = 0.f;
+		g_inputInfo.InputValue[INPUT_MOUSE_XB] = 0.f;
 		break;
 	}
 	case WM_KEYDOWN:
@@ -160,7 +200,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_DESTROY:
 	case WM_CLOSE:
 	{
-		PostQuitMessage(0);
+		::PostQuitMessage(0);
 		break;
 	}
 	}
@@ -219,6 +259,7 @@ int AppMain(int argc, char** argv, hg::IApplication* pApp)
 	pApp->Init();
 
 	// Init subsystems
+	Thread_Init();
 	Console_Init(&g_consoleInfo);
 	if (!appSettings.EnableConsole)
 	{
@@ -228,12 +269,14 @@ int AppMain(int argc, char** argv, hg::IApplication* pApp)
 	{
 		Console_Show(&g_consoleInfo);
 	}
+	Log_Init(&g_logInfo);
 
 	CPU_InitInfo(&g_cpuInfo);
 	DRAM_InitInfo(&g_dramInfo);
 	Power_UpdateStatus(&g_powerInfo);
 	Monitor_InitInfo(g_monitorInfo, g_monitorCount);
 	Time_Init(&g_timeInfo);
+	Input_Init(&g_inputInfo);
 	Window_Init();
 	
 	// Create application window
