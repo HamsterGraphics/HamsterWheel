@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "OSConfig.h"
+#include <OSConfig.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -65,8 +65,7 @@ typedef struct CPUInfo
 	bool Padding : 7;
 } CPUInfo;
 
-bool CPU_InitInfo(CPUInfo* pInfo);
-HG_API CPUInfo* CPU_GetInfo();
+C_ABI HG_OS_API bool HG_CALLDECL CPU_InitInfo(CPUInfo* pInfo);
 
 ///////////////////////////////////////////////////////////////////////////////////
 // DRAM
@@ -77,8 +76,7 @@ typedef struct DRAMInfo
 	uint64 AvailableSize;
 } DRAMInfo;
 
-bool DRAM_InitInfo(DRAMInfo* pInfo);
-HG_API DRAMInfo* DRAM_GetInfo();
+C_ABI HG_OS_API bool HG_CALLDECL DRAM_InitInfo(DRAMInfo* pInfo);
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Power
@@ -92,8 +90,7 @@ typedef struct PowerInfo
 	bool Padding : 6;
 } PowerInfo;
 
-HG_API bool Power_UpdateStatus(PowerInfo* pInfo);
-HG_API PowerInfo* Power_GetInfo();
+C_ABI HG_OS_API bool HG_CALLDECL Power_UpdateStatus(PowerInfo* pInfo);
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Monitor
@@ -113,9 +110,7 @@ typedef struct MonitorInfo
 	uint32 Index;
 } MonitorInfo;
 
-bool Monitor_InitInfo(MonitorInfo* pInfo, uint32& monitorCount);
-HG_API MonitorInfo* Monitor_GetInfo(uint32 monitorIndex);
-HG_API uint32 Monitor_GetCount();
+C_ABI HG_OS_API bool HG_CALLDECL Monitor_InitInfo(MonitorInfo* pInfo, uint32& monitorCount);
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Time
@@ -126,9 +121,8 @@ typedef struct TimeInfo
 	float SecondsPerCycle;
 } TimeInfo;
 
-bool Time_Init(TimeInfo* pInfo);
-HG_API TimeInfo* Time_GetInfo();
-HG_API int64 Time_QueryCounter();
+C_ABI HG_OS_API bool HG_CALLDECL Time_Init(TimeInfo* pInfo);
+C_ABI HG_OS_API int64 HG_CALLDECL Time_QueryCounter();
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Console
@@ -139,10 +133,24 @@ typedef struct ConsoleInfo
 	void* WindowHandle;
 } ConsoleInfo;
 
-bool Console_Init(ConsoleInfo* pInfo);
-void Console_Shutdown(ConsoleInfo* pInfo);
-HG_API void Console_Show(ConsoleInfo* pInfo);
-HG_API void Console_Hide(ConsoleInfo* pInfo);
+C_ABI HG_OS_API bool HG_CALLDECL Console_Init(ConsoleInfo* pInfo);
+C_ABI HG_OS_API void HG_CALLDECL Console_Shutdown(ConsoleInfo* pInfo);
+C_ABI HG_OS_API void HG_CALLDECL Console_Show(ConsoleInfo* pInfo);
+C_ABI HG_OS_API void HG_CALLDECL Console_Hide(ConsoleInfo* pInfo);
+
+///////////////////////////////////////////////////////////////////////////////////
+// Environment Variable
+///////////////////////////////////////////////////////////////////////////////////
+C_ABI HG_OS_API bool HG_CALLDECL EnvironmentVariable_Contains(const char* key);
+C_ABI HG_OS_API const char* HG_CALLDECL EnvironmentVariable_Get(const char* key);
+C_ABI HG_OS_API bool HG_CALLDECL EnvironmentVariable_Set(const char* key, const char* value);
+
+///////////////////////////////////////////////////////////////////////////////////
+// Module
+///////////////////////////////////////////////////////////////////////////////////
+C_ABI HG_OS_API void* HG_CALLDECL Module_Load(const char* pFilePath);
+C_ABI HG_OS_API void HG_CALLDECL Module_Unload(void* pModule);
+C_ABI HG_OS_API void* HG_CALLDECL Module_GetFunctionAddress(void* pModule, const char* pFunctionName);
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Log
@@ -150,7 +158,6 @@ HG_API void Console_Hide(ConsoleInfo* pInfo);
 typedef struct LogInfo
 {
 } LogInfo;
-HG_API bool Log_Init(LogInfo* pInfo);
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Thread
@@ -164,12 +171,10 @@ typedef struct ThreadInfo
 	ThreadFunction ThreadMain;
 } ThreadInfo;
 
-bool Thread_Init();
-HG_API bool Thread_IsInMainThread();
-HG_API uint32 Thread_GetCurrentID();
-HG_API const char* Thread_GetCurrentName();
-HG_API void Thread_SetCurrentName(const char* pName);
-HG_API void Thread_Sleep(uint32 seconds);
-HG_API bool Thread_Create(ThreadInfo* pInfo);
-HG_API void Thread_Join(ThreadInfo* pInfo);
-HG_API void Thread_Detach(ThreadInfo* pInfo);
+C_ABI HG_OS_API uint32 HG_CALLDECL Thread_GetCurrentID();
+C_ABI HG_OS_API const char* HG_CALLDECL Thread_GetCurrentName();
+C_ABI HG_OS_API void HG_CALLDECL Thread_SetCurrentName(const char* pName);
+C_ABI HG_OS_API void HG_CALLDECL Thread_Sleep(uint32 seconds);
+C_ABI HG_OS_API bool HG_CALLDECL Thread_Create(ThreadInfo* pInfo);
+C_ABI HG_OS_API void HG_CALLDECL Thread_Join(ThreadInfo* pInfo);
+C_ABI HG_OS_API void HG_CALLDECL Thread_Detach(ThreadInfo* pInfo);

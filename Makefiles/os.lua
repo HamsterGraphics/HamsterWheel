@@ -1,13 +1,14 @@
 project("OS")
-	kind("StaticLib")
+	if BuildModuleAsDll then
+		kind("SharedLib")
+		defines { "HG_OS_EXPORT", "HG_MODULE_SHARED" }
+	else
+		kind("StaticLib")
+	end
 
 	Project.CppLanguage()
 	Project.Location(BuildOutputPath)
 	Project.StaticRuntime("on")
-
-	defines {
-		"HG_EXPORT"
-	}
 
 	includedirs {
 		path.join(SourcePath, "Core"),

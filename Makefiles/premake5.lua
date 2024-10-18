@@ -3,7 +3,8 @@ dofile("utils.lua")
 --------------------------------------------------------------
 -- Path
 --------------------------------------------------------------
-PlatformName = os.getenv("PLATFORM_NAME")
+BuildModuleAsDll = os.getenv("HG_MODULE_SHARED") or false
+PlatformName = os.getenv("HG_PLATFORM_NAME") or "Windows"
 BackendName = "D3D12"
 CurrentWorkingPath = os.getcwd()
 MakeFileRelativePath = "Makefiles"
@@ -17,6 +18,7 @@ ExamplesPath = path.join(RootPath, "Examples")
 -- Dump Info
 --------------------------------------------------------------
 Log.Info("-----------------------Path---------------------------")
+Dump.PrintVar("BuildModuleAsDll", BuildModuleAsDll)
 Dump.PrintVar("PlatformName", PlatformName)
 Dump.PrintVar("CurrentWorkingPath", CurrentWorkingPath)
 Dump.PrintVar("RootPath", RootPath)

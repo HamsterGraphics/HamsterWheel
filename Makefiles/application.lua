@@ -5,17 +5,16 @@ project("Application")
 	Project.Location(BuildOutputPath)
 	Project.StaticRuntime("on")
 	dependson {
-		"OS", "Graphics"
+		"OS"
 	}
 
 	defines {
-		"HG_EXPORT"
+		--"HG_APP_EXPORT"
 	}
 
 	includedirs {
 		path.join(SourcePath, "Core"),
 		path.join(SourcePath, "OS/Public"),
-		path.join(SourcePath, "Graphics/Public"),
 		path.join(SourcePath, "Application/Public"),
 	}
 
@@ -30,7 +29,7 @@ project("Application")
 	}
 
 	links {
-		"OS", "Graphics"
+		"OS"
 	}
 
 	Project.CommonSettings()

@@ -10,10 +10,14 @@
 #include <Base/APIDefines.h>
 #include <Base/BasicTypes.h>
 
-#ifdef HG_EXPORT
-#define HG_API API_EXPORT
+#ifdef HG_OS_EXPORT
+#define HG_OS_API API_EXPORT
 #else
-#define HG_API API_IMPORT
+#ifdef HG_MODULE_SHARED
+#define HG_OS_API API_IMPORT
+#else
+#define HG_OS_API
+#endif
 #endif
 
 #ifdef _WIN32

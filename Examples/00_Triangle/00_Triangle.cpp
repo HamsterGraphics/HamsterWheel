@@ -1,11 +1,27 @@
-﻿#include <IApplication.h>
+﻿/*
+ * Copyright (c) 2024-2025 HamsterGraphics
+ *
+ * https://github.com/HamsterGraphics/HamsterWheel
+ *
+ */
+
+#include <IApplication.h>
+#include <IGraphics.h>
 
 class TriangleApp : public hg::IApplication
 {
 public:
+	virtual bool InitSettings() override
+	{
+		memset(&AppSettings, 0, sizeof(AppSettings));
+		AppSettings.EnableConsole = true;
+		return true;
+	}
+
 	virtual bool Init() override
 	{
-		m_settings.EnableConsole = true;
+		memset(&m_graphicsInfo, 0, sizeof(m_graphicsInfo));
+		Graphics_Init(&m_graphicsInfo);
 		return true;
 	}
 
@@ -25,6 +41,9 @@ public:
 	{
 		return "00_Triangle";
 	}
+
+private:
+	GraphicsInfo m_graphicsInfo;
 };
 
 DEFINE_APP_MAIN(TriangleApp);

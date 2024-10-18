@@ -4,7 +4,7 @@
 Dump = {}
 Dump.PrintVar = function(name, value)
 	term.pushColor(term.cyan)
-	print(name.." : "..value)
+	print(name.." : "..tostring(value))
 	term.popColor()
 end
 

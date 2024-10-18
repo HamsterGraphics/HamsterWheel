@@ -328,6 +328,45 @@ void Console_Hide(ConsoleInfo* pInfo)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
+// Environment Variable
+///////////////////////////////////////////////////////////////////////////////////
+bool EnvironmentVariable_Contains(const char* key)
+{
+	return ::GetEnvironmentVariableA(key, NULL, 0) > 0;
+}
+
+const char* EnvironmentVariable_Get(const char* key)
+{
+	// Limit according to http://msdn.microsoft.com/en-us/library/ms683188.aspx
+	const DWORD buffSize = 65535;
+	static char buffer[buffSize];
+	return ::GetEnvironmentVariableA(key, buffer, buffSize) ? buffer : nullptr;
+}
+
+bool EnvironmentVariable_Set(const char* key, const char* value)
+{
+	return ::SetEnvironmentVariableA(key, value);
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+// Module
+///////////////////////////////////////////////////////////////////////////////////
+void* Module_Load(const char* pFilePath)
+{
+	return ::LoadLibraryA(pFilePath);
+}
+
+void Module_Unload(void* pModule)
+{
+	::FreeLibrary((HMODULE)pModule);
+}
+
+void* Module_GetFunctionAddress(void* pModule, const char* pFunctionName)
+{
+	return ::GetProcAddress((HMODULE)pModule, pFunctionName);
+}
+
+///////////////////////////////////////////////////////////////////////////////////
 // Utils
 ///////////////////////////////////////////////////////////////////////////////////
 uint32 CountSetBits(CPUInfo* pInfo, ULONG_PTR bitMask)

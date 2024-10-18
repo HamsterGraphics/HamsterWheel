@@ -206,21 +206,6 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	return ::DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
-bool Window_Init()
-{
-	WNDCLASSW windowClass;
-	memset(&windowClass, 0, sizeof(windowClass));
-	windowClass.style = 0;
-	windowClass.lpfnWndProc = WindowProc;
-	windowClass.hInstance = (HINSTANCE)::GetModuleHandle(NULL);
-	windowClass.hIcon = ::LoadIcon(NULL, IDI_APPLICATION);
-	windowClass.hCursor = ::LoadCursor(NULL, IDC_ARROW);
-	windowClass.lpszClassName = HG_WINDOW_CLASS_NAME;
-	::RegisterClassW(&windowClass);
-
-	return true;
-}
-
 void Window_AdjustRect(const hg::AppSettings& appSettings, WindowInfo& windowInfo)
 {
 	windowInfo.WindowRect.X = appSettings.WindowPosX;
@@ -252,10 +237,10 @@ int AppMain(int argc, char** argv, hg::IApplication* pApp)
 	UNUSED(argv);
 	g_pApp = pApp;
 
-	// Init application
-	auto& appSettings = pApp->GetSettings();
-	pApp->Init();
-
+	// Init application settings
+	pApp->InitSettings();
+	auto& appSettings = pApp->AppSettings;
+	
 	// Init subsystems
 	Thread_Init();
 	Console_Init(&g_consoleInfo);
@@ -275,8 +260,11 @@ int AppMain(int argc, char** argv, hg::IApplication* pApp)
 	Monitor_InitInfo(g_monitorInfo, g_monitorCount);
 	Time_Init(&g_timeInfo);
 	Input_Init(&g_inputInfo);
-	Window_Init();
+	Window_Init(WindowProc);
 	
+	// Init application
+	pApp->Init();
+
 	// Create application window
 	WindowInfo windowInfo;
 	memset(&windowInfo, 0, sizeof(windowInfo));

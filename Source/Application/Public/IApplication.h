@@ -7,12 +7,12 @@
 
 #pragma once
 
-#include <OSConfig.h>
+#include <ApplicationConfig.h>
 
  ///////////////////////////////////////////////////////
  // Input
  ///////////////////////////////////////////////////////
-enum InputKey
+typedef enum InputKey
 {
 	INPUT_MOUSE_X,
 	INPUT_MOUSE_Y,
@@ -23,7 +23,7 @@ enum InputKey
 	INPUT_MOUSE_WHEEL,
 
 	MAX_INPUT_VALUE
-};
+} InputKey;
 
 typedef struct InputInfo
 {
@@ -31,7 +31,7 @@ typedef struct InputInfo
 } InputInfo;
 
 bool Input_Init(InputInfo* pInfo);
-HG_API float Input_GetValue(InputKey key);
+float Input_GetValue(InputKey key);
 
 ///////////////////////////////////////////////////////
 // Application
@@ -52,21 +52,19 @@ typedef struct AppSettings
 	bool Padding : 6;
 } AppSettings;
 
-class HG_API IApplication
+class HG_APP_API IApplication
 {
 public:
+	virtual bool InitSettings() = 0;
 	virtual bool Init() = 0;
 	virtual void Shutdown() = 0;
 	virtual void Update(float deltaTime) = 0;
 	virtual void Render() = 0;
 
 	virtual const char* GetName() const = 0;
-	virtual AppSettings& GetSettings() { return m_settings; }
 
+	AppSettings AppSettings;
 	float InputValue[MAX_INPUT_VALUE];
-
-protected:
-	AppSettings m_settings;
 };
 
 }
