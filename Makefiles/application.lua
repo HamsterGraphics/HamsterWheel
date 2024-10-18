@@ -9,7 +9,7 @@ project("Application")
 	}
 
 	defines {
-		"HG_EXPORT"
+		--"HG_APP_EXPORT"
 	}
 
 	includedirs {

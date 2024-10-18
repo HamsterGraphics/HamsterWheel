@@ -11,16 +11,16 @@
 class TriangleApp : public hg::IApplication
 {
 public:
-	TriangleApp()
+	virtual bool InitSettings() override
 	{
-		memset(&m_settings, 0, sizeof(m_settings));
-		m_settings.EnableConsole = true;
-
-		memset(&m_graphicsInfo, 0, sizeof(m_graphicsInfo));
+		memset(&AppSettings, 0, sizeof(AppSettings));
+		AppSettings.EnableConsole = true;
+		return true;
 	}
 
 	virtual bool Init() override
 	{
+		memset(&m_graphicsInfo, 0, sizeof(m_graphicsInfo));
 		Graphics_Init(&m_graphicsInfo);
 		return true;
 	}

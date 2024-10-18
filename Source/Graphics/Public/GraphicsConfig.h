@@ -10,10 +10,14 @@
 #include <Base/APIDefines.h>
 #include <Base/BasicTypes.h>
 
-#ifdef HG_EXPORT
+#ifdef HG_GFX_EXPORT
 #define HG_GFX_API API_EXPORT
 #else
+#ifdef HG_MODULE_SHARED
 #define HG_GFX_API API_IMPORT
+#else
+#define HG_GFX_API
+#endif
 #endif
 
 // D3D12

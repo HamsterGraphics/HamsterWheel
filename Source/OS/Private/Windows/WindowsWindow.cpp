@@ -13,6 +13,20 @@
 
 #include <cstdlib>
 
+bool Window_Init(void* pWindowProcessFunc)
+{
+    WNDCLASSW windowClass;
+    memset(&windowClass, 0, sizeof(windowClass));
+    windowClass.style = 0;
+    windowClass.lpfnWndProc = (WNDPROC)pWindowProcessFunc;
+    windowClass.hInstance = (HINSTANCE)::GetModuleHandle(NULL);
+    windowClass.hIcon = ::LoadIcon(NULL, IDI_APPLICATION);
+    windowClass.hCursor = ::LoadCursor(NULL, IDC_ARROW);
+    windowClass.lpszClassName = HG_WINDOW_CLASS_NAME;
+    ::RegisterClassW(&windowClass);
+    return true;
+}
+
 bool Window_HandleMessages()
 {
     MSG msg;

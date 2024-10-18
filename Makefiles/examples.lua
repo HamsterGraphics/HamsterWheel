@@ -2,7 +2,7 @@ local function MakeExample(exampleFolder)
 	local exampleName = path.getbasename(exampleFolder)
 	project(exampleName)
 		kind("ConsoleApp")
-		dependson { "Application" }
+		dependson { "Application", "Graphics" }
 
 		Project.CppLanguage()
 		Project.Location(BuildOutputPath)
@@ -21,7 +21,7 @@ local function MakeExample(exampleFolder)
 		}
 
 		links {
-			"Application"
+			"Application", "Graphics"
 		}
 end
 

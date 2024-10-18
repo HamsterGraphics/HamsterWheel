@@ -1,21 +1,17 @@
 project("Graphics")
-	kind("StaticLib")
+	if BuildModuleAsDll then
+		kind("SharedLib")
+		defines { "HG_GFX_EXPORT", "HG_MODULE_SHARED" }
+	else
+		kind("StaticLib")
+	end
 
 	Project.CppLanguage()
 	Project.Location(BuildOutputPath)
 	Project.StaticRuntime("on")
 
-	dependson {
-		"OS"
-	}
-
-	defines {
-		"HG_EXPORT"
-	}
-
 	includedirs {
 		path.join(SourcePath, "Core"),
-		path.join(SourcePath, "OS/Public"),
 		path.join(SourcePath, "Graphics/Public"),
 	}
 
@@ -30,7 +26,6 @@ project("Graphics")
 	}
 
 	links {
-		"OS"
 	}
 
 	Project.CommonSettings()

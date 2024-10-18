@@ -7,8 +7,7 @@
 
 #pragma once
 
-#include <OSConfig.h>
-#define HG_APP_API HG_OS_API
+#include <ApplicationConfig.h>
 
  ///////////////////////////////////////////////////////
  // Input
@@ -32,7 +31,7 @@ typedef struct InputInfo
 } InputInfo;
 
 bool Input_Init(InputInfo* pInfo);
-C_ABI HG_APP_API float HG_CALLDECL Input_GetValue(InputKey key);
+float Input_GetValue(InputKey key);
 
 ///////////////////////////////////////////////////////
 // Application
@@ -56,18 +55,16 @@ typedef struct AppSettings
 class HG_APP_API IApplication
 {
 public:
+	virtual bool InitSettings() = 0;
 	virtual bool Init() = 0;
 	virtual void Shutdown() = 0;
 	virtual void Update(float deltaTime) = 0;
 	virtual void Render() = 0;
 
 	virtual const char* GetName() const = 0;
-	virtual AppSettings& GetSettings() { return m_settings; }
 
+	AppSettings AppSettings;
 	float InputValue[MAX_INPUT_VALUE];
-
-protected:
-	AppSettings m_settings;
 };
 
 }
