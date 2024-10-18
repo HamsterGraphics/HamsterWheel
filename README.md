@@ -1,5 +1,7 @@
 # HamsterWheel
 
+[![Windows](https://github.com/HamsterGraphics/HamsterWheel/actions/workflows/win64_vs2022_msvc.yml/badge.svg?branch=main)](https://github.com/HamsterGraphics/HamsterWheel/actions/workflows/win64_vs2022_msvc.yml)
+
 A fundamental framework helps to create graphics application.
 
 * Modules

@@ -1,0 +1,29 @@
+name: win64_vs2022_msvc
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-engine:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3.2.0
+      with:
+        submodules: recursive
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
+
+    - name: Make Solution
+      run: ${{github.workspace}}/Generate_Windows.bat
+      
+    - name: Build Debugx64
+      run: msbuild ${{github.workspace}}/HamsterWheel.sln /p:Configuration=Debug /p:Platform=x64
+      
+    - name: Build Releasex64
+      run: msbuild ${{github.workspace}}/HamsterWheel.sln /p:Configuration=Release /p:Platform=x64
