@@ -9,18 +9,20 @@
 
 #include "Base/APIDefines.h"
 #include "Base/BasicTypes.h"
+#include "Base/CPUDefines.h"
+#include "Base/PlatformDefines.h"
 
-#ifdef HG_OS_EXPORT
+#if defined(HG_OS_EXPORT)
 #define HG_OS_API API_EXPORT
 #else
-#ifdef HG_MODULE_SHARED
+#if defined(HG_MODULE_SHARED)
 #define HG_OS_API API_IMPORT
 #else
 #define HG_OS_API
 #endif
 #endif
 
-#ifdef _WIN32
+#if defined(HG_PLATFORM_WINDOWS)
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -30,9 +32,13 @@
 #define NOMINMAX
 #endif
 
+#define HG_WINDOW_CLASS_NAME L"HamsterGraphics"
+
+#include <windows.h>
+
 #endif
 
-#define HG_WINDOW_CLASS_NAME L"HamsterGraphics"
+
 
 typedef struct Rect
 {

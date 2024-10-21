@@ -7,6 +7,14 @@
 
 #pragma once
 
+#if defined(__clang__)
+#define HG_COMPILER_CLANG
+#elif defined(_MSC_VER)
+#define HG_COMPILER_MSC
+#elif defined(__GNUC__)
+#define HG_COMPILER_GCC
+#endif
+
 #define UNUSED(a) ((void)(a))
 
 #define INLINE inline

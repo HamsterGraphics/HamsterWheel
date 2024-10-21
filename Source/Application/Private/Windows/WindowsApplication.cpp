@@ -5,11 +5,10 @@
  *
  */
 
-#include <IApplication.h>
-#include <IOperatingSystem.h>
-#include <IWindow.h>
-
-#include <Math/Math.h>
+#include "IApplication.h"
+#include "IOperatingSystem.h"
+#include "IWindow.h"
+#include "Math/Math.h"
 
 #include <cstring>
 #include <memory>

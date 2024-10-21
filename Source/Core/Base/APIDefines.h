@@ -9,10 +9,10 @@
 
 #include "CompilerDefines.h"
 
-#ifdef _MSC_VER
+#if defined(HG_COMPILER_MSC)
 #define API_EXPORT __declspec(dllexport)
 #define API_IMPORT __declspec(dllimport)
-#elif defined(__GNUC__)
+#elif defined(HG_COMPILER_GCC)
 #define API_EXPORT __attribute__((visibility("default")))
 #define API_IMPORT
 #else
@@ -20,7 +20,7 @@
 #define API_IMPORT
 #endif
 
-#ifdef __cplusplus
+#if defined(__cplusplus)
 #define C_ABI extern "C"
 #else
 #define C_ABI

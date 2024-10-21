@@ -1,4 +1,4 @@
-name: Mac
+name: MacOS
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build-mac:
+  build-macOS:
     runs-on: macOS-latest
 
     steps:
@@ -17,7 +17,7 @@ jobs:
         submodules: recursive
 
     - name: Make Xcode Project
-      run: ${{github.workspace}}/Generate_Mac.sh
+      run: ${{github.workspace}}/Generate_MacOS.sh
       
     - name: Build Debugx64
       run: xcodebuild -workspace ${{github.workspace}}/HamsterWheel.xcworkspace -scheme 00_Triangle -configuration Debug -arch x86_64 clean build

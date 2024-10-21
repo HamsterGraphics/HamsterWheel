@@ -9,18 +9,19 @@
 
 #include "Base/APIDefines.h"
 #include "Base/BasicTypes.h"
+#include "Base/PlatformDefines.h"
 
-#ifdef HG_GFX_EXPORT
+#if defined(HG_GFX_EXPORT)
 #define HG_GFX_API API_EXPORT
 #else
-#ifdef HG_MODULE_SHARED
+#if defined(HG_MODULE_SHARED)
 #define HG_GFX_API API_IMPORT
 #else
 #define HG_GFX_API
 #endif
 #endif
 
-#ifdef _WIN32
+#if defined(HG_PLATFORM_WINDOWS)
 #include <d3d12.h>
 #endif
 

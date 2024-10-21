@@ -5,9 +5,8 @@
  *
  */
 
-#include "IWindow.h"
-
 #include "Base/TypeTraits.h"
+#include "IWindow.h"
 
 #include <windows.h>
 

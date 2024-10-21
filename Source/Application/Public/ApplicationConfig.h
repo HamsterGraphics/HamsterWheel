@@ -10,7 +10,7 @@
 #include "Base/APIDefines.h"
 #include "Base/BasicTypes.h"
 
-#ifdef HG_APP_EXPORT
+#if defined(HG_APP_EXPORT)
 #define HG_APP_API API_EXPORT
 #else
 #define HG_APP_API API_IMPORT
