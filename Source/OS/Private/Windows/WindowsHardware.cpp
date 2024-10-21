@@ -38,8 +38,8 @@ bool CPU_InitInfo(CPUInfo* pInfo)
 	*reinterpret_cast<int*>(pInfo->Vendor) = CPU_IndexData[1];
 	*reinterpret_cast<int*>(pInfo->Vendor + 4) = CPU_IndexData[3];
 	*reinterpret_cast<int*>(pInfo->Vendor + 8) = CPU_IndexData[2];
-	pInfo->IsAMD = 0 == strcmp(pInfo->Vendor, "AuthenticAMD");
-	pInfo->IsIntel = 0 == strcmp(pInfo->Vendor, "GenuineIntel");
+	pInfo->IsAMD = 0 == strcmp(pInfo->Vendor, HG_CPU_VENDOR_AMD);
+	pInfo->IsIntel = 0 == strcmp(pInfo->Vendor, HG_CPU_VENDOR_INTEL);
 
 	hg::Bitset<32> CPU_f_1_ECX;
 	hg::Bitset<32> CPU_f_1_EDX;
@@ -90,22 +90,22 @@ bool CPU_InitInfo(CPUInfo* pInfo)
 		memcpy(pInfo->Brand + 32, CPU_IndexData, sizeof(CPU_IndexData));
 	}
 
-	pInfo->HasAVX = CPU_f_1_ECX[28];
-	pInfo->HasAVX2 = CPU_f_7_EBX[5];
-	pInfo->HasAVX512CD = CPU_f_7_EBX[28];
-	pInfo->HasAVX512ER = CPU_f_7_EBX[27];
-	pInfo->HasAVX512F = CPU_f_7_EBX[16];
-	pInfo->HasAVX512PF = CPU_f_7_EBX[26];
-	pInfo->HasSSE = CPU_f_1_EDX[25];
-	pInfo->HasSSE2 = CPU_f_1_EDX[26];
-	pInfo->HasSSE3 = CPU_f_1_ECX[0];
-	pInfo->HasSSE41 = CPU_f_1_ECX[19];
-	pInfo->HasSSE42 = CPU_f_1_ECX[20];
-	pInfo->HasSSSE3 = CPU_f_1_ECX[9];
-	pInfo->HasFMA = CPU_f_1_ECX[12];
-	pInfo->HasF16C = CPU_f_1_ECX[29];
-	pInfo->HasPOPCNT = CPU_f_1_ECX[23];
-	pInfo->HasLZCNT = pInfo->IsIntel && CPU_f_81_ECX[5];
+	//pInfo->HasAVX = CPU_f_1_ECX[28];
+	//pInfo->HasAVX2 = CPU_f_7_EBX[5];
+	//pInfo->HasAVX512CD = CPU_f_7_EBX[28];
+	//pInfo->HasAVX512ER = CPU_f_7_EBX[27];
+	//pInfo->HasAVX512F = CPU_f_7_EBX[16];
+	//pInfo->HasAVX512PF = CPU_f_7_EBX[26];
+	//pInfo->HasSSE = CPU_f_1_EDX[25];
+	//pInfo->HasSSE2 = CPU_f_1_EDX[26];
+	//pInfo->HasSSE3 = CPU_f_1_ECX[0];
+	//pInfo->HasSSE41 = CPU_f_1_ECX[19];
+	//pInfo->HasSSE42 = CPU_f_1_ECX[20];
+	//pInfo->HasSSSE3 = CPU_f_1_ECX[9];
+	//pInfo->HasFMA = CPU_f_1_ECX[12];
+	//pInfo->HasF16C = CPU_f_1_ECX[29];
+	//pInfo->HasPOPCNT = CPU_f_1_ECX[23];
+	//pInfo->HasLZCNT = pInfo->IsIntel && CPU_f_81_ECX[5];
 
 	// Query processor information
 	PSYSTEM_LOGICAL_PROCESSOR_INFORMATION processorInfoBuffer = NULL;
@@ -286,7 +286,7 @@ bool Monitor_InitInfo(MonitorInfo* pInfo, uint32& monitorCount)
 ///////////////////////////////////////////////////////////////////////////////////
 uint32 CountSetBits(CPUInfo* pInfo, ULONG_PTR bitMask)
 {
-	if (pInfo->HasPOPCNT)
+	if (pInfo->Features.POPCNT)
 	{
 		return static_cast<uint32>(__popcnt64(bitMask));
 	}
