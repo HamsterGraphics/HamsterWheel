@@ -19,6 +19,7 @@ jobs:
     - name: Make Xcode Project
       run: |
         chmod +x ${{github.workspace}}/Generate_MacOS.command
+        chmod +x ${{github.workspace}}/Tools/Premake/MacOS/premake5
         ${{github.workspace}}/Generate_MacOS.command
       
     - name: Build Debugx64
