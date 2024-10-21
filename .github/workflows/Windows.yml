@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build-engine:
+  build-windows:
     runs-on: windows-latest
 
     steps:
@@ -19,7 +19,7 @@ jobs:
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.1
 
-    - name: Make Solution
+    - name: Make VisualStudio Solution
       run: ${{github.workspace}}/Generate_Windows.bat
       
     - name: Build Debugx64

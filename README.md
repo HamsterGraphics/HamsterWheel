@@ -1,6 +1,7 @@
 # HamsterWheel
 
 [![Windows](https://github.com/HamsterGraphics/HamsterWheel/actions/workflows/Windows.yml/badge.svg?branch=main)](https://github.com/HamsterGraphics/HamsterWheel/actions/workflows/Windows.yml)
+[![Mac](https://github.com/HamsterGraphics/HamsterWheel/actions/workflows/Mac.yml/badge.svg?branch=main)](https://github.com/HamsterGraphics/HamsterWheel/actions/workflows/Mac.yml)
 
 A fundamental framework helps to create graphics application.
 
