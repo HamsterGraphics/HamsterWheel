@@ -1,13 +1,12 @@
-﻿/*
+/*
  * Copyright (c) 2024-2025 HamsterGraphics
  *
  * https://github.com/HamsterGraphics/HamsterWheel
  *
  */
 
-#include <IWindow.h>
-
-#include <Base/TypeTraits.h>
+#include "Base/TypeTraits.h"
+#include "IWindow.h"
 
 #include <windows.h>
 

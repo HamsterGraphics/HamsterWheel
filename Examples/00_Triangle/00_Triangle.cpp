@@ -1,12 +1,14 @@
-﻿/*
+/*
  * Copyright (c) 2024-2025 HamsterGraphics
  *
  * https://github.com/HamsterGraphics/HamsterWheel
  *
  */
 
-#include <IApplication.h>
-#include <IGraphics.h>
+#include "IApplication.h"
+#include "IGraphics.h"
+
+#include <memory>
 
 class TriangleApp : public hg::IApplication
 {

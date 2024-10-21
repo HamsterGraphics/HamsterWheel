@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2024-2025 HamsterGraphics
  *
  * https://github.com/HamsterGraphics/HamsterWheel
@@ -7,11 +7,7 @@
 
 #pragma once
 
-#include <OSConfig.h>
-
-#ifdef _WIN32
-#include <windows.h>
-#endif
+#include "OSConfig.h"
 
  ///////////////////////////////////////////////////////////////////////////////////
  // CPU
@@ -97,7 +93,7 @@ C_ABI HG_OS_API bool HG_CALLDECL Power_UpdateStatus(PowerInfo* pInfo);
 ///////////////////////////////////////////////////////////////////////////////////
 typedef struct MonitorInfo
 {
-#ifdef _WIN32
+#if defined(HG_PLATFORM_WINDOWS)
 	WCHAR DisplayName[128];
 	WCHAR AdapterName[128];
 #endif

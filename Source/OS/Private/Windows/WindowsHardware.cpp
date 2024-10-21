@@ -5,14 +5,12 @@
  *
  */
 
-#include <IOperatingSystem.h>
-
-#include <Base/TypeTraits.h>
-#include <Containers/Bitset.h>
-
-#include <windows.h>
+#include "Base/TypeTraits.h"
+#include "Containers/Bitset.h"
+#include "IOperatingSystem.h"
 
 #include <intrin.h>
+#include <windows.h>
 
 #include <cstring>
 #include <memory>

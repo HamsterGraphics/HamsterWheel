@@ -1,0 +1,29 @@
+name: MacOS
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-macOS:
+    runs-on: macOS-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3.2.0
+      with:
+        submodules: recursive
+
+    - name: Make Xcode Project
+      run: |
+        chmod +x ${{github.workspace}}/Generate_MacOS.command
+        chmod +x ${{github.workspace}}/Tools/Premake/MacOS/premake5
+        ${{github.workspace}}/Generate_MacOS.command
+      
+    - name: Build Debugx64
+      run: xcodebuild -workspace ${{github.workspace}}/HamsterWheel.xcworkspace -scheme 00_Triangle -configuration Debug -arch x86_64 clean build
+      
+    - name: Build Releasex64
+      run: xcodebuild -workspace ${{github.workspace}}/HamsterWheel.xcworkspace -scheme 00_Triangle -configuration Release -arch x86_64 clean build
