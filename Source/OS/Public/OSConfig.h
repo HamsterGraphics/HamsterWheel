@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2024-2025 HamsterGraphics
  *
  * https://github.com/HamsterGraphics/HamsterWheel
@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <Base/APIDefines.h>
-#include <Base/BasicTypes.h>
+#include "Base/APIDefines.h"
+#include "Base/BasicTypes.h"
 
 #ifdef HG_OS_EXPORT
 #define HG_OS_API API_EXPORT
