@@ -5,6 +5,7 @@ project("Make")
 		path.join(MakefileSourcePath, "**.lua")
 	}
 
+	-- Visual Studio tricks to update project configs quickly
 	filter { "system:windows", "action:vs2022" }
 		prebuildcommands {
 			"cd "..RootPath,

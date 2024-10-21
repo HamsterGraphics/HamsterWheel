@@ -17,7 +17,9 @@ jobs:
         submodules: recursive
 
     - name: Make Xcode Project
-      run: ${{github.workspace}}/Generate_MacOS.sh
+      run: |
+        chmod +x ${{github.workspace}}/Generate_MacOS.command
+        ${{github.workspace}}/Generate_MacOS.command
       
     - name: Build Debugx64
       run: xcodebuild -workspace ${{github.workspace}}/HamsterWheel.xcworkspace -scheme 00_Triangle -configuration Debug -arch x86_64 clean build
