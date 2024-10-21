@@ -20,7 +20,7 @@ jobs:
       run: ${{github.workspace}}/Generate_Mac.sh
       
     - name: Build Debugx64
-      run: xcodebuild -workspace ${{github.workspace}}/HamsterWheel.xcworkspace -schema 00_Triangle -configuration Debug -arch x86_64 clean build
+      run: xcodebuild -workspace ${{github.workspace}}/HamsterWheel.xcworkspace -scheme 00_Triangle -configuration Debug -arch x86_64 clean build
       
     - name: Build Releasex64
-      run: xcodebuild -workspace ${{github.workspace}}/HamsterWheel.xcworkspace -schema 00_Triangle -configuration Release -arch x86_64 clean build
+      run: xcodebuild -workspace ${{github.workspace}}/HamsterWheel.xcworkspace -scheme 00_Triangle -configuration Release -arch x86_64 clean build
