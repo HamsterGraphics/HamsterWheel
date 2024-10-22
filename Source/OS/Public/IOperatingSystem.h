@@ -12,10 +12,20 @@
  ///////////////////////////////////////////////////////////////////////////////////
  // CPU
  ///////////////////////////////////////////////////////////////////////////////////
+#if defined(HG_CPU_ARCH_X86)
+typedef X86Features ISAFeatures;
+#elif defined(HG_CPU_ARCH_AARCH64)
+typedef AARCH64Features ISAFeatures;
+#endif
+
 typedef struct CPUInfo
 {
 	char Vendor[128];
 	char Brand[128];
+
+	// Vendor
+	bool IsAMD : 1;
+	bool IsIntel : 1;
 
 	// Processor
 	int16 PhyscialProcessorCount;
@@ -26,39 +36,8 @@ typedef struct CPUInfo
 	uint32 L2CacheSize;
 	uint32 L3CacheSize;
 
-	// Vendor
-	bool IsAMD : 1;
-	bool IsIntel : 1;
-
-	// AVX
-	bool HasAVX : 1;
-	bool HasAVX2 : 1;
-	bool HasAVX512CD : 1;
-	bool HasAVX512ER : 1;
-	bool HasAVX512F : 1;
-	bool HasAVX512PF : 1;
-
-	// SSE
-	bool HasSSE : 1;
-	bool HasSSE2 : 1;
-	bool HasSSE3 : 1;
-	bool HasSSE41 : 1;
-	bool HasSSE42 : 1;
-	bool HasSSSE3 : 1;
-
-	// Fused Multiply-Add
-	bool HasFMA : 1;
-
-	// 16-bit Floating-Point conversion
-	bool HasF16C : 1;
-
-	// Return the Count of Number of Bits Set to 1
-	bool HasPOPCNT : 1;
-
-	// Count the Number of Leading Zero Bits
-	bool HasLZCNT : 1;
-
-	bool Padding : 7;
+	// Features
+	ISAFeatures Features;
 } CPUInfo;
 
 C_ABI HG_OS_API bool HG_CALLDECL CPU_InitInfo(CPUInfo* pInfo);

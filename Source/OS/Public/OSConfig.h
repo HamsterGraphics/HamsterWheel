@@ -38,7 +38,8 @@
 
 #endif
 
-
+#define MAX_MONITOR_COUNT 4
+#define MAX_THREAD_NAME_LENGTH 32
 
 typedef struct Rect
 {
@@ -47,6 +48,3 @@ typedef struct Rect
 	int32 Width;
 	int32 Height;
 } Rect;
-
-#define MAX_MONITOR_COUNT 4
-#define MAX_THREAD_NAME_LENGTH 32

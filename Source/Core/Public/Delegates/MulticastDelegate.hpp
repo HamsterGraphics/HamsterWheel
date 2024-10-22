@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <Containers/List.h>
-#include <Delegates/Delegate.hpp>
+#include "Containers/List.h"
+#include "Delegates/Delegate.hpp"
 
 #define DECLARE_MULTICAST_DELEGATE(name, ...) \
 using name = hg::MulticastDelegate<void(__VA_ARGS__)>;

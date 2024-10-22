@@ -11,7 +11,7 @@ project("Graphics")
 	Project.StaticRuntime("on")
 
 	includedirs {
-		path.join(SourcePath, "Core"),
+		path.join(SourcePath, "Core/Public"),
 		path.join(SourcePath, "Graphics/Public"),
 	}
 
