@@ -32,18 +32,23 @@ Log.Info("------------------------------------------------------")
 -- Workspace
 --------------------------------------------------------------
 workspace("HamsterWheel")
-	architecture "x64"
 	location(RootPath)
 	system("windows")
 	systemversion("latest")
 	startproject("Runtime")
 
+	filter { "system:windows" }
+		architecture("x86_64")
+	filter { "system:macosx" }
+		architecture("universal")
+	filter {}
+
 	configurations { "Debug", "Release" }
-	filter "configurations:Debug"
+	filter { "configurations:Debug" }
 		defines { "_DEBUG" }
 		symbols("On")
 		optimize("Off")
-	filter "configurations:Release"
+	filter { "configurations:Release" }
 		defines { "NDEBUG" }
 		symbols("On")
 		optimize("Full")
