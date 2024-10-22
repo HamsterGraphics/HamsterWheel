@@ -65,6 +65,7 @@ group("Modules")
 dofile("core.lua")
 dofile("os.lua")
 dofile("graphics.lua")
+dofile("scene.lua")
 group("")
 
 dofile("application.lua")
