@@ -33,15 +33,14 @@ Log.Info("------------------------------------------------------")
 --------------------------------------------------------------
 workspace("HamsterWheel")
 	location(RootPath)
-	system("windows")
-	systemversion("latest")
-	startproject("Runtime")
+	startproject("00_Triangle")
 
 	filter { "system:windows" }
 		architecture("x86_64")
 	filter { "system:macosx" }
 		architecture("universal")
 	filter {}
+	systemversion("latest")
 
 	configurations { "Debug", "Release" }
 	filter { "configurations:Debug" }
