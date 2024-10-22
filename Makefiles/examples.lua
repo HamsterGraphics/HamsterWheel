@@ -14,7 +14,7 @@ local function MakeExample(exampleFolder)
 		}
 
 		includedirs {
-			path.join(SourcePath, "Core"),
+			path.join(SourcePath, "Core/Public"),
 			path.join(SourcePath, "OS/Public"),
 			path.join(SourcePath, "Graphics/Public"),
 			path.join(SourcePath, "Application/Public"),

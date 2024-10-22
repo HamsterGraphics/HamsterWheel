@@ -27,3 +27,13 @@
 #endif
 
 #define HG_CALLDECL __cdecl
+
+#if defined(HG_CORE_EXPORT)
+#define HG_CORE_API API_EXPORT
+#else
+#if defined(HG_MODULE_SHARED)
+#define HG_CORE_API API_IMPORT
+#else
+#define HG_CORE_API
+#endif
+#endif

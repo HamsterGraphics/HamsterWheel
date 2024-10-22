@@ -90,22 +90,23 @@ bool CPU_InitInfo(CPUInfo* pInfo)
 		memcpy(pInfo->Brand + 32, CPU_IndexData, sizeof(CPU_IndexData));
 	}
 
-	//pInfo->HasAVX = CPU_f_1_ECX[28];
-	//pInfo->HasAVX2 = CPU_f_7_EBX[5];
-	//pInfo->HasAVX512CD = CPU_f_7_EBX[28];
-	//pInfo->HasAVX512ER = CPU_f_7_EBX[27];
-	//pInfo->HasAVX512F = CPU_f_7_EBX[16];
-	//pInfo->HasAVX512PF = CPU_f_7_EBX[26];
-	//pInfo->HasSSE = CPU_f_1_EDX[25];
-	//pInfo->HasSSE2 = CPU_f_1_EDX[26];
-	//pInfo->HasSSE3 = CPU_f_1_ECX[0];
-	//pInfo->HasSSE41 = CPU_f_1_ECX[19];
-	//pInfo->HasSSE42 = CPU_f_1_ECX[20];
-	//pInfo->HasSSSE3 = CPU_f_1_ECX[9];
-	//pInfo->HasFMA = CPU_f_1_ECX[12];
-	//pInfo->HasF16C = CPU_f_1_ECX[29];
-	//pInfo->HasPOPCNT = CPU_f_1_ECX[23];
-	//pInfo->HasLZCNT = pInfo->IsIntel && CPU_f_81_ECX[5];
+	auto& features = pInfo->Features;
+	features.AVX = CPU_f_1_ECX[28];
+	features.AVX2 = CPU_f_7_EBX[5];
+	features.AVX512CD = CPU_f_7_EBX[28];
+	features.AVX512ER = CPU_f_7_EBX[27];
+	features.AVX512F = CPU_f_7_EBX[16];
+	features.AVX512PF = CPU_f_7_EBX[26];
+	features.SSE = CPU_f_1_EDX[25];
+	features.SSE2 = CPU_f_1_EDX[26];
+	features.SSE3 = CPU_f_1_ECX[0];
+	features.SSE41 = CPU_f_1_ECX[19];
+	features.SSE42 = CPU_f_1_ECX[20];
+	features.SSSE3 = CPU_f_1_ECX[9];
+	features.FMA3 = CPU_f_1_ECX[12];
+	features.F16C = CPU_f_1_ECX[29];
+	features.POPCNT = CPU_f_1_ECX[23];
+	features.LZCNT = pInfo->IsIntel && CPU_f_81_ECX[5];
 
 	// Query processor information
 	PSYSTEM_LOGICAL_PROCESSOR_INFORMATION processorInfoBuffer = NULL;
