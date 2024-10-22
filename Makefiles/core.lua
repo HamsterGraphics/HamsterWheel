@@ -12,10 +12,6 @@ project("Core")
 
 	location(path.join(RootPath, "Build"))
 	
-	includedirs {
-		path.join(SourcePath, "Core/Public"),
-	}
-
 	files {
 		path.join(SourcePath, "Core/**.*")
 	}

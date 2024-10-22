@@ -11,6 +11,7 @@
 #include "Base/BasicTypes.h"
 #include "Base/CPUDefines.h"
 #include "Base/PlatformDefines.h"
+#include "Math/Math.h"
 
 #if defined(HG_OS_EXPORT)
 #define HG_OS_API API_EXPORT
@@ -40,11 +41,3 @@
 
 #define MAX_MONITOR_COUNT 4
 #define MAX_THREAD_NAME_LENGTH 32
-
-typedef struct Rect
-{
-	int32 X;
-	int32 Y;
-	int32 Width;
-	int32 Height;
-} Rect;

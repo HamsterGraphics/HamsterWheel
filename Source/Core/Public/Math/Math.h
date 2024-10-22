@@ -7,18 +7,76 @@
 
 #pragma once
 
-#include "Base/BasicTypes.h"
+#include "../Base/BasicTypes.h"
 
-namespace hg
+typedef struct Rect
 {
+	int32 X;
+	int32 Y;
+	int32 Width;
+	int32 Height;
+} Rect;
 
-// Equals to "value * numer / denom". Prevent int64 overflow.
-// https://gist.github.com/jspohr/3dc4f00033d79ec5bdaf67bc46c813e3
-int64 Int64MulDiv(int64 value, int64 numer, int64 denom)
+typedef struct RGB
 {
-	int64 q = value / denom;
-	int64 r = value % denom;
-	return q * numer + r * numer / denom;
-}
+	float R;
+	float G;
+	float B;
+} RGB;
 
-}
+typedef struct RGBA
+{
+	float R;
+	float G;
+	float B;
+	float A;
+} RGBA;
+
+typedef struct Vec2
+{
+	float X;
+	float Y;
+} Vec2;
+
+typedef struct Vec3
+{
+	float X;
+	float Y;
+	float Z;
+} Vec3;
+
+typedef struct Vec4
+{
+	float X;
+	float Y;
+	float Z;
+	float W;
+} Vec4;
+
+typedef struct Matrix33
+{
+	float XX, XY, XZ;
+	float YX, YY, YZ;
+	float ZX, ZY, ZZ;
+} Matrix33;
+
+typedef struct Matrix44
+{
+	float XX, XY, XZ, XW;
+	float YX, YY, YZ, YW;
+	float ZX, ZY, ZZ, ZW;
+	float WX, WY, WZ, WW;
+} Matrix44;
+
+typedef struct Transform
+{
+	Vec3 Position;
+	Vec3 Rotation;
+	Vec3 Scale;
+} Transform;
+
+typedef struct AABB
+{
+	Vec2 Min;
+	Vec2 Max;
+} AABB;

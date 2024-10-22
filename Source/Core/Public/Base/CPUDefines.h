@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include "Base/APIDefines.h"
-#include "Base/BasicTypes.h"
+#include "APIDefines.h"
+#include "BasicTypes.h"
 
 ///////////////////////////////////////////////////////
 // Architecture

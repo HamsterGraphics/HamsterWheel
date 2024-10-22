@@ -13,6 +13,7 @@ MakefilePath = path.join(RootPath, MakeFileRelativePath)
 BuildOutputPath = path.join(RootPath, "Build")
 SourcePath = path.join(RootPath, "Source")
 ExamplesPath = path.join(RootPath, "Examples")
+PluginsPath = path.join(RootPath, "Plugins")
 
 --------------------------------------------------------------
 -- Dump Info
@@ -26,6 +27,7 @@ Dump.PrintVar("MakefilePath", MakefilePath)
 Dump.PrintVar("BuildOutputPath", BuildOutputPath)
 Dump.PrintVar("SourcePath", SourcePath)
 Dump.PrintVar("ExamplesPath", ExamplesPath)
+Dump.PrintVar("PluginsPath", PluginsPath)
 Log.Info("------------------------------------------------------")
 
 --------------------------------------------------------------
@@ -65,7 +67,9 @@ group("Modules")
 dofile("core.lua")
 dofile("os.lua")
 dofile("graphics.lua")
+dofile("scene.lua")
 group("")
 
+dofile("plugins.lua")
 dofile("application.lua")
 dofile("examples.lua")

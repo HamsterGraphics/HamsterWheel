@@ -34,9 +34,14 @@ end
 -- Project
 --------------------------------------------------------------
 Project = {}
+Project.CLanguage = function()
+	language("C")
+	cdialect("C99")
+end
+
 Project.CppLanguage = function()
 	language("C++")
-	cppdialect("c++20")
+	cppdialect("C++20")
 end
 
 Project.GetIntermediateDirectory = function()
