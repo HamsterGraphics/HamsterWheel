@@ -7,7 +7,7 @@ PlatformNameToGfxBackendName["MacOS"] = "Metal"
 --------------------------------------------------------------
 -- Path
 --------------------------------------------------------------
-HG_MODULE_SHARED = os.getenv("HG_MODULE_SHARED") or false
+HG_MODULE_SHARED = os.getenv("HG_MODULE_SHARED") or true
 HG_GFX_DYNAMIC_DLL = os.getenv("HG_GFX_DYNAMIC_DLL") or true
 HG_GFX_ENABLE_DEBUG = os.getenv("HG_GFX_ENABLE_DEBUG") or true
 PlatformName = os.getenv("HG_PLATFORM_NAME")

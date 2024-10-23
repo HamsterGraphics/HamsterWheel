@@ -7,9 +7,10 @@
 
 #include "D3D12Context.h"
 
-#include "Base/RefCountPtr.h"
 #include "IGraphics.h"
 #include "IOperatingSystem.h"
+
+#include "Containers/Vector.h"
 
 #if defined(HG_GFX_DYNAMIC_API)
 typedef HRESULT (WINAPI *PFN_D3D12CreateDevice)(_In_opt_ void* pAdapter, D3D_FEATURE_LEVEL MinimumFeatureLevel, _In_ REFIID riid, _COM_Outptr_opt_ void** ppDevice);
@@ -66,6 +67,66 @@ void UnloadD3D12API()
 
 #endif
 
+void Graphics_EnumAdapters(GraphicsContext* pContext, uint32* pAdapterCount, D3D12AdapterInfo* pAdaptersInfo)
+{
+	constexpr D3D_FEATURE_LEVEL FeatureLevelsRange[] =
+	{
+		D3D_FEATURE_LEVEL_12_2,
+		D3D_FEATURE_LEVEL_12_1,
+		D3D_FEATURE_LEVEL_12_0,
+		D3D_FEATURE_LEVEL_11_1,
+		D3D_FEATURE_LEVEL_11_0
+	};
+	constexpr uint32 FeatureLevelsCount = sizeof(FeatureLevelsRange) / sizeof(D3D_FEATURE_LEVEL);
+	constexpr D3D_FEATURE_LEVEL MinFeatureLevel = FeatureLevelsRange[FeatureLevelsCount - 1];
+
+	uint32 availableAdpaterCount = 0;
+	uint32 adapterIndex = 0;
+	hg::RefCountPtr<IDXGIAdapter4> pAdapter;
+	while (true)
+	{
+		if (D3D12_FAILED(pContext->Factory->EnumAdapterByGpuPreference(adapterIndex++, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&pAdapter))))
+		{
+			break;
+		}
+
+		DXGI_ADAPTER_DESC3 adapterDesc = {};
+		pAdapter->GetDesc3(&adapterDesc);
+		if (adapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)
+		{
+			continue;
+		}
+
+		hg::RefCountPtr<ID3D12Device5> pDevice;
+		if (D3D12_FAILED(Graphics_D3D12CreateDevice(pAdapter, MinFeatureLevel, IID_PPV_ARGS(&pDevice))))
+		{
+			continue;
+		}
+
+		if (pAdaptersInfo)
+		{
+			auto& adapterInfo = pAdaptersInfo[availableAdpaterCount];
+
+			D3D12_FEATURE_DATA_FEATURE_LEVELS featureLevelsData = {};
+			featureLevelsData.pFeatureLevelsRequested = FeatureLevelsRange;
+			featureLevelsData.NumFeatureLevels = FeatureLevelsCount;
+			D3D12_VERIFY(pDevice->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &featureLevelsData, sizeof(featureLevelsData)));
+
+			adapterInfo.DeviceID = adapterDesc.DeviceId;
+			adapterInfo.VendorID = adapterDesc.VendorId;
+			adapterInfo.Revision = adapterDesc.Revision;
+			adapterInfo.DedicatedVRAM = adapterDesc.DedicatedVideoMemory;
+			adapterInfo.MaxFeatureLevel = featureLevelsData.MaxSupportedFeatureLevel;
+		}
+		else
+		{
+			++availableAdpaterCount;
+		}
+	}
+
+	*pAdapterCount = availableAdpaterCount;
+}
+
 bool Graphics_Init(const GraphicsContextCreateInfo& createInfo, GraphicsContext* pContext)
 {
 #if defined(HG_GFX_DYNAMIC_API)
@@ -83,7 +144,15 @@ bool Graphics_Init(const GraphicsContextCreateInfo& createInfo, GraphicsContext*
 	pDebug1->SetEnableGPUBasedValidation(createInfo.EnableGPUBasedValidation);
 	pDebug1->SetEnableSynchronizedCommandQueueValidation(createInfo.EnableSynchronizedCommandQueueValidation);
 #endif
+
 	D3D12_VERIFY(Graphics_CreateDXGIFactory2(factoryFlags, IID_PPV_ARGS(&pContext->Factory)));
+
+	uint32 adapterCount = 0;
+	Graphics_EnumAdapters(pContext, &adapterCount, nullptr);
+	Assert(adapterCount > 0);
+
+	hg::Vector<D3D12AdapterInfo> adaptersInfo;
+	Graphics_EnumAdapters(pContext, &adapterCount, adaptersInfo.data());
 
 	return true;
 }

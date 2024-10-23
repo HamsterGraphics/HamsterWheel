@@ -11,6 +11,7 @@
 #include "Base/Assert.h"
 #include "Base/BasicTypes.h"
 #include "Base/PlatformDefines.h"
+#include "Base/RefCountPtr.h"
 
 #if defined(HG_GFX_EXPORT)
 #define HG_GFX_API API_EXPORT
@@ -31,6 +32,7 @@
 #endif
 
 #define D3D12_SUCCEED(result) (HRESULT)result >= 0
+#define D3D12_FAILED(result) (HRESULT)result < 0
 #define D3D12_VERIFY(result) Assert((HRESULT)result >= 0)
 
 typedef struct D3D12GraphicsContextCreateInfo
@@ -59,3 +61,4 @@ typedef D3D12GraphicsContext GraphicsContext;
 #endif
 
 #define MAX_GPU_COUNT 4
+#define MAX_GPU_NAME_LENGTH 128
