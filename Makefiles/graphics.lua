@@ -6,6 +6,8 @@ project("Graphics")
 		kind("StaticLib")
 	end
 
+	dependson { "Core", "OS" }
+
 	Project.CppLanguage()
 	Project.Location(BuildOutputPath)
 	Project.StaticRuntime("on")
@@ -26,6 +28,7 @@ project("Graphics")
 	}
 
 	links {
+		"Core", "OS"
 	}
 
 	Project.CommonSettings()

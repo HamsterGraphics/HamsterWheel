@@ -9,6 +9,16 @@
 #include "Base/Meta.h"
 #include "Math/Math.h"
 
+struct Camera;
+struct Joint;
+struct Light;
+struct Material;
+struct Mesh;
+struct Node;
+struct Skeleton;
+struct Skin;
+struct Texture;
+
 ///////////////////////////////////////////////////////////////////////////////////
 // Node
 ///////////////////////////////////////////////////////////////////////////////////
@@ -52,7 +62,7 @@ typedef enum LightType
 	LIGHT_TYPE_DIRECTIONAL,
 	LIGHT_TYPE_POINT,
 	LIGHT_TYPE_SPOT,
-};
+} LightType;
 
 typedef struct Light
 {
@@ -68,7 +78,7 @@ typedef struct Light
 typedef enum TextureType
 {
 	TEXTURE_TYPE_FILE,
-};
+} TextureType;
 
 typedef struct Texture
 {
@@ -93,28 +103,28 @@ typedef struct Material
 ///////////////////////////////////////////////////////////////////////////////////
 typedef struct SubMesh
 {
+	uint32* Indices;
+	uint32 TriangleCount;
+	Material* Material;
+} SubMesh;
+
+typedef struct Mesh
+{
+	char Name[MAX_SCENE_OBJECT_NAME_LENGTH];
+	AABB Bounds;
 	uint32 VertexCount;
 	uint32 UVSetCount;
 	uint32 ColorSetCount;
+	uint32 SubMeshCount;
 	Vec3* Positions;
 	Vec3* Normals;
 	Vec3* Tangents;
 	Vec3* BiTangents;
 	Vec2* UVs[MAX_UV_SET_COUNT];
 	RGB* Colors[MAX_COLOR_SET_COUNT];
-	Skin* Skin;
-	AABB Bounds;
-} SubMesh;
-
-typedef struct Mesh
-{
-	char Name[MAX_SCENE_OBJECT_NAME_LENGTH];
-	uint32 SubMeshCount;
-	uint32 MaterialCount;
 	SubMesh* SubMeshes;
-	Material* Materials;
-	AABB Bounds;
-};
+	Skin* Skin;
+} Mesh;
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Joint
@@ -161,3 +171,8 @@ typedef struct Track
 
 	char Name[MAX_SCENE_OBJECT_NAME_LENGTH];
 } Track;
+
+///////////////////////////////////////////////////////////////////////////////////
+// API
+///////////////////////////////////////////////////////////////////////////////////
+C_ABI HG_SCENE_API void Scene_Init();
