@@ -16,12 +16,12 @@ project("Scene")
 	}
 
 	files {
-		path.join(SourcePath, "Scene/Public/**.*"),
+		path.join(SourcePath, "Scene/**.*"),
 	}
 
 	vpaths {
-		["Public"] = path.join(SourcePath, "Scene/Public/**.*"),
-		["Private"] = path.join(SourcePath, "Scene/Private/**.*")
+		["Public/*"] = path.join(SourcePath, "Scene/Public/*/**.*"),
+		["Private/*"] = path.join(SourcePath, "Scene/Private/*/**.*")
 	}
 
 	Project.CommonSettings()

@@ -9,6 +9,16 @@
 #include "Base/Meta.h"
 #include "Math/Math.h"
 
+struct Camera;
+struct Joint;
+struct Light;
+struct Material;
+struct Mesh;
+struct Node;
+struct Skeleton;
+struct Skin;
+struct Texture;
+
 ///////////////////////////////////////////////////////////////////////////////////
 // Node
 ///////////////////////////////////////////////////////////////////////////////////
@@ -52,7 +62,7 @@ typedef enum LightType
 	LIGHT_TYPE_DIRECTIONAL,
 	LIGHT_TYPE_POINT,
 	LIGHT_TYPE_SPOT,
-};
+} LightType;
 
 typedef struct Light
 {
@@ -68,7 +78,7 @@ typedef struct Light
 typedef enum TextureType
 {
 	TEXTURE_TYPE_FILE,
-};
+} TextureType;
 
 typedef struct Texture
 {
@@ -114,7 +124,7 @@ typedef struct Mesh
 	RGB* Colors[MAX_COLOR_SET_COUNT];
 	SubMesh* SubMeshes;
 	Skin* Skin;
-};
+} Mesh;
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Joint
@@ -161,3 +171,8 @@ typedef struct Track
 
 	char Name[MAX_SCENE_OBJECT_NAME_LENGTH];
 } Track;
+
+///////////////////////////////////////////////////////////////////////////////////
+// API
+///////////////////////////////////////////////////////////////////////////////////
+C_ABI HG_SCENE_API void Scene_Init();
