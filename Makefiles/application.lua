@@ -5,11 +5,7 @@ project("Application")
 	Project.Location(BuildOutputPath)
 	Project.StaticRuntime("on")
 	dependson {
-		"OS"
-	}
-
-	defines {
-		--"HG_APP_EXPORT"
+		"Core", "OS"
 	}
 
 	includedirs {
@@ -29,7 +25,7 @@ project("Application")
 	}
 
 	links {
-		"OS"
+		"Core", "OS"
 	}
 
 	Project.CommonSettings()

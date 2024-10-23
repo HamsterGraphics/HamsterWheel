@@ -1,8 +1,14 @@
+local PluginsMakeCallbacks = {}
+PluginsMakeCallbacks["FbxImporter"] = function()
+	dependson { "Scene" }
+	links { "Scene" }
+end
+
 local function MakePlugin(pluginFolder)
 	local pluginName = path.getbasename(pluginFolder)
 	project(pluginName)
 		kind("SharedLib")
-		--dependson { "Core" }
+		dependson { "Core" }
 
 		Project.CppLanguage()
 		Project.Location(BuildOutputPath)
@@ -18,8 +24,13 @@ local function MakePlugin(pluginFolder)
 		}
 
 		links {
-			--"Core"
+			"Core"
 		}
+
+		local pluginCallback = PluginsMakeCallbacks[pluginName]
+		if pluginCallback then
+			pluginCallback()
+		end
 end
 
 group("Plugins")

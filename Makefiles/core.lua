@@ -12,11 +12,15 @@ project("Core")
 
 	location(path.join(RootPath, "Build"))
 	
+	includedirs {
+		path.join(SourcePath, "Core/Public")
+	}
+
 	files {
 		path.join(SourcePath, "Core/**.*")
 	}
 
 	vpaths {
 		["Public/*"] = path.join(SourcePath, "Core/Public/*/**.*"),
-		["Private"] = path.join(SourcePath, "Core/Private/**.*")
+		["Private/*"] = path.join(SourcePath, "Core/Private/*/**.*")
 	}
