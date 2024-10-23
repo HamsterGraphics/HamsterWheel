@@ -8,6 +8,7 @@ local function MakePlugin(pluginFolder)
 	local pluginName = path.getbasename(pluginFolder)
 	project(pluginName)
 		kind("SharedLib")
+
 		dependson { "Core" }
 
 		Project.CppLanguage()
