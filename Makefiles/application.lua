@@ -4,6 +4,8 @@ project("Application")
 	Project.CppLanguage()
 	Project.Location(BuildOutputPath)
 	Project.StaticRuntime("on")
+	Project.CommonSettings()
+
 	dependson {
 		"Core", "OS"
 	}
@@ -27,5 +29,3 @@ project("Application")
 	links {
 		"Core", "OS"
 	}
-
-	Project.CommonSettings()

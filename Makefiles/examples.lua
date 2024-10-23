@@ -9,6 +9,14 @@ local function MakeExample(exampleFolder)
 		Project.StaticRuntime("on")
 		Project.CommonSettings()
 
+		defines {
+			"HG_GFX_BACKEND_"..string.upper(GfxBackendName)
+		}
+
+		if HG_GFX_ENABLE_DEBUG then
+			defines { "HG_GFX_ENABLE_DEBUG" }
+		end
+
 		files {
 			path.join(exampleFolder, "**.*")
 		}

@@ -12,11 +12,11 @@
 ///////////////////////////////////////////////////////
 // Generic
 ///////////////////////////////////////////////////////
-typedef enum GraphicsAPI
+typedef enum GraphicsBackend
 {
-	GFX_API_D3D12,
-	GFX_API_VULKAN,
-	GFX_API_METAL
+	GFX_BACKEND_D3D12,
+	GFX_BACKEND_VULKAN,
+	GFX_BACKEND_METAL
 } GraphicsAPI;
 
 typedef enum GPUMode
@@ -207,7 +207,7 @@ typedef enum ShaderModel
 } ShaderModel;
 
 ///////////////////////////////////////////////////////
-// GPU Instance
+// GPU
 ///////////////////////////////////////////////////////
 typedef struct GPUInfo
 {
@@ -215,13 +215,17 @@ typedef struct GPUInfo
 	uint32 WaveLaneCount;
 } GPUInfo;
 
-typedef struct GraphicsInfo
-{
-	GPUMode Mode;
-	GPUInfo GPU[MAX_GPU_COUNT];
-	bool EnableGPUValidation : 1;
-	bool EnableDebugLayer : 1;
-	bool Padding : 6;
-} GraphicsInfo;
+///////////////////////////////////////////////////////
+// Context
+///////////////////////////////////////////////////////
+C_ABI HG_GFX_API bool HG_CALLDECL Graphics_Init(const GraphicsContextCreateInfo& createInfo, GraphicsContext* pContext);
+C_ABI HG_GFX_API void HG_CALLDECL Graphics_Shutdown(GraphicsContext* pContext);
 
-C_ABI HG_GFX_API bool HG_CALLDECL Graphics_Init(GraphicsInfo* pInfo);
+///////////////////////////////////////////////////////
+// Instance
+///////////////////////////////////////////////////////
+typedef struct InstanceInfo
+{
+} InstanceInfo;
+
+C_ABI HG_GFX_API bool HG_CALLDECL Graphics_CreateInstance(InstanceInfo* pInfo);

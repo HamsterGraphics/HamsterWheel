@@ -1,5 +1,5 @@
 project("Core")
-	if BuildModuleAsDll then
+	if HG_MODULE_SHARED then
 		kind("SharedLib")
 		defines { "HG_CORE_EXPORT", "HG_MODULE_SHARED" }
 	else
@@ -9,6 +9,7 @@ project("Core")
 	Project.CppLanguage()
 	Project.Location(BuildOutputPath)
 	Project.StaticRuntime("on")
+	Project.CommonSettings()
 
 	location(path.join(RootPath, "Build"))
 	

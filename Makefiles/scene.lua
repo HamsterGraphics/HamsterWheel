@@ -1,5 +1,5 @@
 project("Scene")
-	if BuildModuleAsDll then
+	if HG_MODULE_SHARED then
 		kind("SharedLib")
 		defines { "HG_SCENE_EXPORT", "HG_MODULE_SHARED" }
 	else
@@ -9,6 +9,7 @@ project("Scene")
 	Project.CppLanguage()
 	Project.Location(BuildOutputPath)
 	Project.StaticRuntime("on")
+	Project.CommonSettings()
 
 	includedirs {
 		path.join(SourcePath, "Core/Public"),
@@ -23,5 +24,3 @@ project("Scene")
 		["Public/*"] = path.join(SourcePath, "Scene/Public/*/**.*"),
 		["Private/*"] = path.join(SourcePath, "Scene/Private/*/**.*")
 	}
-
-	Project.CommonSettings()
