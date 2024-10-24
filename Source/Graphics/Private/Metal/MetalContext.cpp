@@ -9,8 +9,12 @@
 
 bool Graphics_Init(const GraphicsContextCreateInfo& createInfo, GraphicsContext* pContext)
 {
+	UNUSED(createInfo);
+	UNUSED(pContext);
+	return true;
 }
 
 void Graphics_Shutdown(GraphicsContext* pContext)
 {
+	UNUSED(pContext);
 }
