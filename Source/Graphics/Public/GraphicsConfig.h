@@ -73,6 +73,7 @@ typedef struct GraphicsContext
 #if defined(HG_GFX_ENABLE_DEBUG)
 	ID3D12Debug* Debug;
 	ID3D12InfoQueue1* InfoQueue;
+	DWORD CallbackCookie;
 #endif
 } GraphicsContext;
 

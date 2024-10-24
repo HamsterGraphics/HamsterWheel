@@ -7,6 +7,7 @@
 
 #include "IApplication.h"
 #include "IGraphics.h"
+#include "IOperatingSystem.h"
 
 #include <memory>
 
@@ -21,12 +22,13 @@ public:
 
 	virtual bool Init() override
 	{
+		LOG_TRACE("Init graphics backend");
+		m_graphicsContext = std::make_unique<GraphicsContext>();
 		GraphicsContextCreateInfo contextCreateInfo;
 		contextCreateInfo.Debug.EnableGPUBasedValidation = true;
 		contextCreateInfo.Debug.EnableSynchronizedCommandQueueValidation = false;
-
-		m_graphicsContext = std::make_unique<GraphicsContext>();
 		Graphics_Init(contextCreateInfo, m_graphicsContext.get());
+
 		return true;
 	}
 
