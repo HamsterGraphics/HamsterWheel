@@ -24,39 +24,64 @@
 #endif
 
 #if defined(HG_GFX_BACKEND_D3D12)
+///////////////////////////////////////////////////////
+// D3D12
+///////////////////////////////////////////////////////
 #include <d3d12.h>
 #include <dxgi1_6.h>
 
 #if defined(HG_GFX_ENABLE_DEBUG)
 #include <dxgidebug.h>
+typedef struct GraphicsDebugContextCreateInfo
+{
+	bool EnableGPUBasedValidation;
+	bool EnableSynchronizedCommandQueueValidation;
+} GraphicsDebugContextCreateInfo;
 #endif
 
 #define D3D12_SUCCEED(result) (HRESULT)result >= 0
 #define D3D12_FAILED(result) (HRESULT)result < 0
 #define D3D12_VERIFY(result) Assert((HRESULT)result >= 0)
 
-typedef struct D3D12GraphicsContextCreateInfo
+typedef struct GraphicsContextCreateInfo
 {
 	D3D_FEATURE_LEVEL FeatureLevel;
 #if defined(HG_GFX_ENABLE_DEBUG)
-	bool EnableGPUBasedValidation;
-	bool EnableSynchronizedCommandQueueValidation;
+	GraphicsDebugContextCreateInfo Debug;
 #endif
-} D3D12GraphicsContextCreateInfo;
+} GraphicsContextCreateInfo;
 
-typedef struct D3D12GraphicsContext
+typedef struct GraphicsContext
 {
 	IDXGIFactory6* Factory;
 #if defined(HG_GFX_ENABLE_DEBUG)
 	ID3D12Debug* Debug;
 #endif
-} D3D12GraphicsContext;
+} GraphicsContext;
 
-typedef D3D12GraphicsContextCreateInfo GraphicsContextCreateInfo;
-typedef D3D12GraphicsContext GraphicsContext;
 #elif defined(HG_GFX_BACKEND_VULKAN)
+///////////////////////////////////////////////////////
+// Vulkan
+///////////////////////////////////////////////////////
+typedef struct GraphicsContextCreateInfo
+{
+} GraphicsContextCreateInfo;
+
+typedef struct GraphicsContext
+{
+} GraphicsContext;
 
 #elif defined(HG_GFX_BACKEND_METAL)
+///////////////////////////////////////////////////////
+// Metal
+///////////////////////////////////////////////////////
+typedef struct GraphicsContextCreateInfo
+{
+} GraphicsContextCreateInfo;
+
+typedef struct GraphicsContext
+{
+} GraphicsContext;
 
 #endif
 

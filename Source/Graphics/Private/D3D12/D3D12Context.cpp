@@ -141,8 +141,8 @@ bool Graphics_Init(const GraphicsContextCreateInfo& createInfo, GraphicsContext*
 
 	hg::RefCountPtr<ID3D12Debug1> pDebug1;
 	D3D12_VERIFY(pContext->Debug->QueryInterface(IID_PPV_ARGS(&pDebug1)));
-	pDebug1->SetEnableGPUBasedValidation(createInfo.EnableGPUBasedValidation);
-	pDebug1->SetEnableSynchronizedCommandQueueValidation(createInfo.EnableSynchronizedCommandQueueValidation);
+	pDebug1->SetEnableGPUBasedValidation(createInfo.Debug.EnableGPUBasedValidation);
+	pDebug1->SetEnableSynchronizedCommandQueueValidation(createInfo.Debug.EnableSynchronizedCommandQueueValidation);
 #endif
 
 	D3D12_VERIFY(Graphics_CreateDXGIFactory2(factoryFlags, IID_PPV_ARGS(&pContext->Factory)));
