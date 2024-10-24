@@ -7,10 +7,9 @@
 
 #include "D3D12Context.h"
 
+#include "Containers/Vector.h"
 #include "IGraphics.h"
 #include "IOperatingSystem.h"
-
-#include "Containers/Vector.h"
 
 #if defined(HG_GFX_DYNAMIC_API)
 typedef HRESULT (WINAPI *PFN_D3D12CreateDevice)(_In_opt_ void* pAdapter, D3D_FEATURE_LEVEL MinimumFeatureLevel, _In_ REFIID riid, _COM_Outptr_opt_ void** ppDevice);
@@ -112,11 +111,17 @@ void Graphics_EnumAdapters(GraphicsContext* pContext, uint32* pAdapterCount, D3D
 			featureLevelsData.NumFeatureLevels = FeatureLevelsCount;
 			D3D12_VERIFY(pDevice->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &featureLevelsData, sizeof(featureLevelsData)));
 
+			D3D12_FEATURE_DATA_SHADER_MODEL shaderModelData = {};
+			shaderModelData.HighestShaderModel = D3D_SHADER_MODEL_6_6;
+			D3D12_VERIFY(pDevice->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &shaderModelData, sizeof(shaderModelData)));
+
+			adapterInfo.Adapter = pAdapter;
 			adapterInfo.DeviceID = adapterDesc.DeviceId;
 			adapterInfo.VendorID = adapterDesc.VendorId;
 			adapterInfo.Revision = adapterDesc.Revision;
 			adapterInfo.DedicatedVRAM = adapterDesc.DedicatedVideoMemory;
 			adapterInfo.MaxFeatureLevel = featureLevelsData.MaxSupportedFeatureLevel;
+			adapterInfo.MaxShaderModel = shaderModelData.HighestShaderModel;
 		}
 		else
 		{
@@ -125,6 +130,59 @@ void Graphics_EnumAdapters(GraphicsContext* pContext, uint32* pAdapterCount, D3D
 	}
 
 	*pAdapterCount = availableAdpaterCount;
+}
+
+void Graphics_InitDevice(GraphicsContext* pContext)
+{
+	uint32 adapterCount = 0;
+	Graphics_EnumAdapters(pContext, &adapterCount, nullptr);
+	Assert(adapterCount > 0);
+
+	hg::Vector<D3D12AdapterInfo> adaptersInfo(adapterCount);
+	Graphics_EnumAdapters(pContext, &adapterCount, adaptersInfo.data());
+
+	uint32 currentAdapterIndex = 0;
+	uint32 selectAdapterIndex = 0;
+	uint64 maxVRAM = 0;
+	for (const auto& adapterInfo : adaptersInfo)
+	{
+		if (adapterInfo.DedicatedVRAM > maxVRAM)
+		{
+			maxVRAM = adapterInfo.DedicatedVRAM;
+			selectAdapterIndex = currentAdapterIndex;
+		}
+		++currentAdapterIndex;
+	}
+
+	const auto& selectAdapterInfo = adaptersInfo[selectAdapterIndex];
+	D3D12_VERIFY(Graphics_D3D12CreateDevice(selectAdapterInfo.Adapter, selectAdapterInfo.MaxFeatureLevel, IID_PPV_ARGS(&pContext->Device)));
+
+#if defined(HG_GFX_ENABLE_DEBUG)
+	hg::RefCountPtr<ID3D12InfoQueue1> pInfoQueue;
+	if (D3D12_SUCCEED(pContext->Device->QueryInterface(IID_PPV_ARGS(&pContext->InfoQueue))))
+	{
+		D3D12_VERIFY(pContext->InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, TRUE));
+		D3D12_VERIFY(pContext->InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, TRUE));
+		D3D12_VERIFY(pContext->InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, FALSE));
+		D3D12_VERIFY(pContext->InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_INFO, FALSE));
+		D3D12_VERIFY(pContext->InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_MESSAGE, FALSE));
+
+		auto MessageCallback = [](D3D12_MESSAGE_CATEGORY Category, D3D12_MESSAGE_SEVERITY Severity,
+			D3D12_MESSAGE_ID ID, LPCSTR pDescription, void* pContext)
+			{
+				printf("D3D12 Validation Layer: %s\n", pDescription);
+			};
+
+		DWORD callbackCookie = 0;
+		D3D12_VERIFY(pContext->InfoQueue->RegisterMessageCallback(MessageCallback, D3D12_MESSAGE_CALLBACK_FLAG_NONE, nullptr, &callbackCookie));
+	}
+#endif
+
+	D3D12MA::ALLOCATOR_DESC desc = {};
+	desc.Flags = D3D12MA::ALLOCATOR_FLAG_NONE;
+	desc.pDevice = pContext->Device;
+	desc.pAdapter = selectAdapterInfo.Adapter;
+	D3D12_VERIFY(D3D12MA::CreateAllocator(&desc, &pContext->ResourceAllocator));
 }
 
 bool Graphics_Init(const GraphicsContextCreateInfo& createInfo, GraphicsContext* pContext)
@@ -146,14 +204,7 @@ bool Graphics_Init(const GraphicsContextCreateInfo& createInfo, GraphicsContext*
 #endif
 
 	D3D12_VERIFY(Graphics_CreateDXGIFactory2(factoryFlags, IID_PPV_ARGS(&pContext->Factory)));
-
-	uint32 adapterCount = 0;
-	Graphics_EnumAdapters(pContext, &adapterCount, nullptr);
-	Assert(adapterCount > 0);
-
-	hg::Vector<D3D12AdapterInfo> adaptersInfo;
-	Graphics_EnumAdapters(pContext, &adapterCount, adaptersInfo.data());
-
+	Graphics_InitDevice(pContext);
 	return true;
 }
 
@@ -165,6 +216,12 @@ void Graphics_Shutdown(GraphicsContext* pContext)
 		pContext->Factory = nullptr;
 	}
 	
+	if (pContext->Device)
+	{
+		pContext->Device->Release();
+		pContext->Device = nullptr;
+	}
+
 #if defined(HG_GFX_ENABLE_DEBUG)
 	if (pContext->Debug)
 	{
@@ -172,6 +229,12 @@ void Graphics_Shutdown(GraphicsContext* pContext)
 		pContext->Debug = nullptr;
 	}
 	
+	if (pContext->InfoQueue)
+	{
+		pContext->InfoQueue->Release();
+		pContext->InfoQueue = nullptr;
+	}
+
 	hg::RefCountPtr<IDXGIDebug1> pDebug1;
 	D3D12_VERIFY(Graphics_DXGIGetDebugInterface1(0, IID_PPV_ARGS(&pDebug1)));
 	pDebug1->ReportLiveObjects(IID_DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_DETAIL | DXGI_DEBUG_RLO_SUMMARY | DXGI_DEBUG_RLO_IGNORE_INTERNAL));

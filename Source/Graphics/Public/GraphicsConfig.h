@@ -29,6 +29,7 @@
 ///////////////////////////////////////////////////////
 #include <d3d12.h>
 #include <dxgi1_6.h>
+#include <D3D12MemoryAllocator/D3D12MemAlloc.h>
 
 #if defined(HG_GFX_ENABLE_DEBUG)
 #include <dxgidebug.h>
@@ -43,6 +44,13 @@ typedef struct GraphicsDebugContextCreateInfo
 #define D3D12_FAILED(result) (HRESULT)result < 0
 #define D3D12_VERIFY(result) Assert((HRESULT)result >= 0)
 
+typedef struct DescriptorHeap
+{
+	ID3D12DescriptorHeap* Heap;
+	D3D12_CPU_DESCRIPTOR_HANDLE StartCpuHandle;
+	D3D12_GPU_DESCRIPTOR_HANDLE StartGpuHandle;
+} DescriptorHeap;
+
 typedef struct GraphicsContextCreateInfo
 {
 	D3D_FEATURE_LEVEL FeatureLevel;
@@ -54,8 +62,11 @@ typedef struct GraphicsContextCreateInfo
 typedef struct GraphicsContext
 {
 	IDXGIFactory6* Factory;
+	ID3D12Device* Device;
+	D3D12MA::Allocator* ResourceAllocator;
 #if defined(HG_GFX_ENABLE_DEBUG)
 	ID3D12Debug* Debug;
+	ID3D12InfoQueue1* InfoQueue;
 #endif
 } GraphicsContext;
 

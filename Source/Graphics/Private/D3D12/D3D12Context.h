@@ -24,6 +24,7 @@ typedef struct D3D12AdapterInfo
 {
 	hg::RefCountPtr<IDXGIAdapter4> Adapter;
 	D3D_FEATURE_LEVEL MaxFeatureLevel;
+	D3D_SHADER_MODEL MaxShaderModel;
 	uint32 VendorID;
 	uint32 DeviceID;
 	uint32 Revision;

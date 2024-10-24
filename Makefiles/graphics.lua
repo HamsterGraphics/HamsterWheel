@@ -36,6 +36,7 @@ project("Graphics")
 		path.join(SourcePath, "Core/Public"),
 		path.join(SourcePath, "OS/Public"),
 		path.join(SourcePath, "Graphics/Public"),
+		path.join(SourcePath, "Graphics/ThirdParty"),
 	}
 
 	files {

@@ -23,8 +23,8 @@ public:
 	virtual bool Init() override
 	{
 		GraphicsContextCreateInfo contextCreateInfo;
-		contextCreateInfo.EnableGPUBasedValidation = true;
-		contextCreateInfo.EnableSynchronizedCommandQueueValidation = false;
+		contextCreateInfo.Debug.EnableGPUBasedValidation = true;
+		contextCreateInfo.Debug.EnableSynchronizedCommandQueueValidation = false;
 
 		m_graphicsContext = std::make_unique<GraphicsContext>();
 		Graphics_Init(contextCreateInfo, m_graphicsContext.get());
