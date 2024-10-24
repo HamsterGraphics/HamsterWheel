@@ -16,19 +16,23 @@ public:
 	virtual bool InitSettings() override
 	{
 		memset(&AppSettings, 0, sizeof(AppSettings));
-		AppSettings.EnableConsole = true;
 		return true;
 	}
 
 	virtual bool Init() override
 	{
-		memset(&m_graphicsInfo, 0, sizeof(m_graphicsInfo));
-		Graphics_Init(&m_graphicsInfo);
+		GraphicsContextCreateInfo contextCreateInfo;
+		contextCreateInfo.Debug.EnableGPUBasedValidation = true;
+		contextCreateInfo.Debug.EnableSynchronizedCommandQueueValidation = false;
+
+		m_graphicsContext = std::make_unique<GraphicsContext>();
+		Graphics_Init(contextCreateInfo, m_graphicsContext.get());
 		return true;
 	}
 
 	virtual void Shutdown() override
 	{
+		Graphics_Shutdown(m_graphicsContext.get());
 	}
 
 	virtual void Update(float deltaTime) override
@@ -45,7 +49,7 @@ public:
 	}
 
 private:
-	GraphicsInfo m_graphicsInfo;
+	std::unique_ptr<GraphicsContext> m_graphicsContext;
 };
 
 DEFINE_APP_MAIN(TriangleApp);

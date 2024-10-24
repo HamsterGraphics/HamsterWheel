@@ -48,8 +48,6 @@ typedef struct AppSettings
 
 	// Don't create GUI window. Run in batch mode.
 	bool Faceless : 1;
-	bool EnableConsole : 1;
-	bool Padding : 6;
 } AppSettings;
 
 class HG_APP_API IApplication

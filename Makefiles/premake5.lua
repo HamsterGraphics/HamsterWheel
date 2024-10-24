@@ -1,11 +1,17 @@
 dofile("utils.lua")
 
+local PlatformNameToGfxBackendName = {}
+PlatformNameToGfxBackendName["Windows"] = "D3D12"
+PlatformNameToGfxBackendName["MacOS"] = "Metal"
+
 --------------------------------------------------------------
 -- Path
 --------------------------------------------------------------
-BuildModuleAsDll = os.getenv("HG_MODULE_SHARED") or false
-PlatformName = os.getenv("HG_PLATFORM_NAME") or "Windows"
-BackendName = "D3D12"
+HG_MODULE_SHARED = os.getenv("HG_MODULE_SHARED") or false
+HG_GFX_DYNAMIC_DLL = os.getenv("HG_GFX_DYNAMIC_DLL") or true
+HG_GFX_ENABLE_DEBUG = os.getenv("HG_GFX_ENABLE_DEBUG") or true
+PlatformName = os.getenv("HG_PLATFORM_NAME")
+GfxBackendName = PlatformNameToGfxBackendName[PlatformName]
 CurrentWorkingPath = os.getcwd()
 MakeFileRelativePath = "Makefiles"
 RootPath = string.sub(CurrentWorkingPath, 0, string.len(CurrentWorkingPath) - string.len(MakeFileRelativePath) - 1)
@@ -14,13 +20,15 @@ BuildOutputPath = path.join(RootPath, "Build")
 SourcePath = path.join(RootPath, "Source")
 ExamplesPath = path.join(RootPath, "Examples")
 PluginsPath = path.join(RootPath, "Plugins")
-
 --------------------------------------------------------------
 -- Dump Info
 --------------------------------------------------------------
 Log.Info("-----------------------Path---------------------------")
-Dump.PrintVar("BuildModuleAsDll", BuildModuleAsDll)
+Dump.PrintVar("HG_MODULE_SHARED", HG_MODULE_SHARED)
+Dump.PrintVar("HG_GFX_DYNAMIC_DLL", HG_GFX_DYNAMIC_DLL)
+Dump.PrintVar("HG_GFX_ENABLE_DEBUG", HG_GFX_ENABLE_DEBUG)
 Dump.PrintVar("PlatformName", PlatformName)
+Dump.PrintVar("GfxBackendName", GfxBackendName)
 Dump.PrintVar("CurrentWorkingPath", CurrentWorkingPath)
 Dump.PrintVar("RootPath", RootPath)
 Dump.PrintVar("MakefilePath", MakefilePath)

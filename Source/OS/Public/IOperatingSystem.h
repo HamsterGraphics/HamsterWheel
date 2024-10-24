@@ -109,9 +109,32 @@ typedef struct ConsoleInfo
 } ConsoleInfo;
 
 C_ABI HG_OS_API bool HG_CALLDECL Console_Init(ConsoleInfo* pInfo);
-C_ABI HG_OS_API void HG_CALLDECL Console_Shutdown(ConsoleInfo* pInfo);
-C_ABI HG_OS_API void HG_CALLDECL Console_Show(ConsoleInfo* pInfo);
-C_ABI HG_OS_API void HG_CALLDECL Console_Hide(ConsoleInfo* pInfo);
+
+///////////////////////////////////////////////////////////////////////////////////
+// Log
+///////////////////////////////////////////////////////////////////////////////////
+typedef enum LogLevel
+{
+	LOG_LEVEL_INFO,
+	LOG_LEVEL_TRACE,
+	LOG_LEVEL_WARNING,
+	LOG_LEVEL_ERROR
+} LogLevel;
+
+C_ABI HG_OS_API void HG_CALLDECL Log_Init(ConsoleInfo* pInfo);
+C_ABI HG_OS_API void HG_CALLDECL Log_PrintFormat(LogLevel level, const char* format, ...);
+
+#if 1
+#define LOG_INFO(format, ...) Log_PrintFormat(LOG_LEVEL_INFO, format, __VA_ARGS__)
+#define LOG_TRACE(format, ...) Log_PrintFormat(LOG_LEVEL_TRACE, format, __VA_ARGS__)
+#define LOG_WARNING(format, ...) Log_PrintFormat(LOG_LEVEL_WARNING, format, __VA_ARGS__)
+#define LOG_ERROR(format, ...) Log_PrintFormat(LOG_LEVEL_ERROR, format, __VA_ARGS__)
+#else
+#define LOG_INFO
+#define LOG_TRACE
+#define LOG_WARNING
+#define LOG_ERROR
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Environment Variable
@@ -126,13 +149,6 @@ C_ABI HG_OS_API bool HG_CALLDECL EnvironmentVariable_Set(const char* key, const 
 C_ABI HG_OS_API void* HG_CALLDECL Module_Load(const char* pFilePath);
 C_ABI HG_OS_API void HG_CALLDECL Module_Unload(void* pModule);
 C_ABI HG_OS_API void* HG_CALLDECL Module_GetFunctionAddress(void* pModule, const char* pFunctionName);
-
-///////////////////////////////////////////////////////////////////////////////////
-// Log
-///////////////////////////////////////////////////////////////////////////////////
-typedef struct LogInfo
-{
-} LogInfo;
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Thread

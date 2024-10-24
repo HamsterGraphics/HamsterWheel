@@ -8,9 +8,9 @@
 #include "IGraphics.h"
 
  ///////////////////////////////////////////////////////
- // GPU Instance
+ // Instance
  ///////////////////////////////////////////////////////
-bool Graphics_Init(GraphicsInfo* pInfo)
+bool Graphics_CreateInstance(InstanceInfo* pInfo)
 {
 	return true;
 }
