@@ -19,12 +19,11 @@ typedef struct WindowInfo
 	void* ParentHandle;
 	Rect WindowRect;
 
-	bool Hide : 1;
-	bool Maxmized : 1;
-	bool Minimized : 1;
-	bool FullScreen : 1;
-	bool Borderless : 1;
-	bool Padding : 3;
+	uint32 Hide : 1;
+	uint32 Maxmized : 1;
+	uint32 Minimized : 1;
+	uint32 FullScreen : 1;
+	uint32 Borderless : 1;
 } WindowInfo;
 
 C_ABI HG_OS_API bool HG_CALLDECL Window_Init(void* pWindowProcessFunc);

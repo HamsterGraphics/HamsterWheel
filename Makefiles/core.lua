@@ -14,7 +14,7 @@ project("Core")
 	location(path.join(RootPath, "Build"))
 	
 	includedirs {
-		path.join(SourcePath, "Core/Public")
+		path.join(SourcePath, "Core/Public"),
 	}
 
 	files {

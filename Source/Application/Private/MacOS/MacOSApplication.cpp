@@ -129,14 +129,6 @@ int AppMain(int argc, char** argv, hg::IApplication* pApp)
 	// Init subsystems
 	Thread_Init();
 	Console_Init(&g_consoleInfo);
-	if (!appSettings.EnableConsole)
-	{
-		Console_Shutdown(&g_consoleInfo);
-	}
-	else
-	{
-		Console_Show(&g_consoleInfo);
-	}
 	Log_Init(&g_logInfo);
 
 	CPU_InitInfo(&g_cpuInfo);
@@ -172,9 +164,6 @@ int AppMain(int argc, char** argv, hg::IApplication* pApp)
 		pApp->Update(deltaSeconds);
 		pApp->Render();
 	}
-
-	// Shutdown subsystems
-	Console_Shutdown(&g_consoleInfo);
 
 	// Shutdown application
 	pApp->Shutdown();

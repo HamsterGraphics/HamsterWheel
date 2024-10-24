@@ -70,15 +70,6 @@ TimeInfo* Time_GetInfo()
 static ConsoleInfo g_consoleInfo;
 
 ///////////////////////////////////////////////////////
-// Log
-///////////////////////////////////////////////////////
-static LogInfo g_logInfo;
-bool Log_Init(LogInfo* pInfo)
-{
-	return true;
-}
-
-///////////////////////////////////////////////////////
 // Thread
 ///////////////////////////////////////////////////////
 static ThreadInfo g_threadInfo;
@@ -236,28 +227,66 @@ int AppMain(int argc, char** argv, hg::IApplication* pApp)
 	UNUSED(argv);
 	g_pApp = pApp;
 
+	Console_Init(&g_consoleInfo);
+	Log_Init(&g_consoleInfo);
+	Thread_Init();
+
+	// Init subsystems
+	LOG_TRACE("Collect CPU info...");
+	constexpr float ByteToMB = 1024.f * 1024.f;
+	CPU_InitInfo(&g_cpuInfo);
+	LOG_INFO("[CPU] %s", g_cpuInfo.Brand);
+	LOG_INFO("  Vendor : %s", g_cpuInfo.Vendor);
+	LOG_INFO("  PhyscialProcessorCount : %u", g_cpuInfo.PhyscialProcessorCount);
+	LOG_INFO("  LogicalProcessorCount : %u", g_cpuInfo.LogicalProcessorCount);
+	LOG_INFO("  L1 Cache = %.3f MB", g_cpuInfo.L1CacheSize / ByteToMB);
+	LOG_INFO("  L2 Cache = %.3f MB", g_cpuInfo.L2CacheSize / ByteToMB);
+	LOG_INFO("  L3 Cache = %.3f MB", g_cpuInfo.L3CacheSize / ByteToMB);
+	LOG_INFO("  ISA Features");
+	LOG_INFO("    [F16C]\t= %u", g_cpuInfo.Features.F16C);
+	LOG_INFO("    [FMA3]\t= %u", g_cpuInfo.Features.FMA3);
+	LOG_INFO("    [LZCNT]\t= %u", g_cpuInfo.Features.LZCNT);
+	LOG_INFO("    [POPCNT]\t= %u", g_cpuInfo.Features.POPCNT);
+	LOG_INFO("    [AVX]\t= %u", g_cpuInfo.Features.AVX);
+	LOG_INFO("    [AVX2]\t= %u", g_cpuInfo.Features.AVX2);
+	LOG_INFO("    [AVX512CD]\t= %u", g_cpuInfo.Features.AVX512CD);
+	LOG_INFO("    [AVX512ER]\t= %u", g_cpuInfo.Features.AVX512ER);
+	LOG_INFO("    [AVX512F]\t= %u", g_cpuInfo.Features.AVX512F);
+	LOG_INFO("    [AVX512PF]\t= %u", g_cpuInfo.Features.AVX512PF);
+	LOG_INFO("    [SSE]\t= %u", g_cpuInfo.Features.SSE);
+	LOG_INFO("    [SSE2]\t= %u", g_cpuInfo.Features.SSE2);
+	LOG_INFO("    [SSE3]\t= %u", g_cpuInfo.Features.SSE3);
+	LOG_INFO("    [SSSE3]\t= %u", g_cpuInfo.Features.SSSE3);
+	LOG_INFO("    [SSE41]\t= %u", g_cpuInfo.Features.SSE41);
+	LOG_INFO("    [SSE42]\t= %u", g_cpuInfo.Features.SSE42);
+
+	LOG_TRACE("Collect DRAM info...");
+	DRAM_InitInfo(&g_dramInfo);
+	LOG_INFO("[DRAM]");
+	LOG_INFO("  AvailableSize = %.3f MB", g_dramInfo.AvailableSize / ByteToMB);
+	LOG_INFO("  TotalSize = %.3f MB", g_dramInfo.TotalSize / ByteToMB);
+
+	LOG_TRACE("Collect Monitor info...");
+	Monitor_InitInfo(g_monitorInfo, g_monitorCount);
+	for (uint32 monitorIndex = 0; monitorIndex < g_monitorCount; ++monitorIndex)
+	{
+		const auto& monitorInfo = g_monitorInfo[monitorIndex];
+		LOG_INFO("[Monitor] %u", monitorInfo.Index);
+		LOG_INFO("  DisplayName = %s", monitorInfo.DisplayName);
+		LOG_INFO("  AdapterName = %s", monitorInfo.AdapterName);
+		LOG_INFO("  DPI = (%u, %u)", monitorInfo.DPI[0], monitorInfo.DPI[1]);
+		LOG_INFO("  PhyscialSize = (w = %u, h = %u)", monitorInfo.PhyscialWidth, monitorInfo.PhyscialHeight);
+		LOG_INFO("  MonitorRect = (x = %u, y = %u, w = %u, h = %u)", monitorInfo.MonitorRect.X, monitorInfo.MonitorRect.Y, monitorInfo.MonitorRect.Width, monitorInfo.MonitorRect.Height);
+		LOG_INFO("  WorkRect = (x = %u, y = %u, w = %u, h = %u)", monitorInfo.WorkRect.X, monitorInfo.WorkRect.Y, monitorInfo.WorkRect.Width, monitorInfo.WorkRect.Height);
+	}
+
+	Power_UpdateStatus(&g_powerInfo);
+	Time_Init(&g_timeInfo);
+
 	// Init application settings
+	LOG_TRACE("Init application settings...");
 	pApp->InitSettings();
 	auto& appSettings = pApp->AppSettings;
-	
-	// Init subsystems
-	Thread_Init();
-	Console_Init(&g_consoleInfo);
-	if (!appSettings.EnableConsole)
-	{
-		Console_Shutdown(&g_consoleInfo);
-	}
-	else
-	{
-		Console_Show(&g_consoleInfo);
-	}
-	Log_Init(&g_logInfo);
-
-	CPU_InitInfo(&g_cpuInfo);
-	DRAM_InitInfo(&g_dramInfo);
-	Power_UpdateStatus(&g_powerInfo);
-	Monitor_InitInfo(g_monitorInfo, g_monitorCount);
-	Time_Init(&g_timeInfo);
 	Input_Init(&g_inputInfo);
 	Window_Init(WindowProc);
 	
@@ -271,6 +300,14 @@ int AppMain(int argc, char** argv, hg::IApplication* pApp)
 	Window_AdjustRect(appSettings, windowInfo);
 	if (!appSettings.Faceless)
 	{
+		LOG_TRACE("Create application window...");
+		LOG_INFO("[Window] %s", windowInfo.Name);
+		LOG_INFO("  FullScreen = %u", windowInfo.FullScreen);
+		LOG_INFO("  Borderless = %u", windowInfo.Borderless);
+		LOG_INFO("  Maxmized = %u", windowInfo.Maxmized);
+		LOG_INFO("  Minimized = %u", windowInfo.Minimized);
+		LOG_INFO("  Hide = %u", windowInfo.Hide);
+		LOG_INFO("  Rect = (x = %u, y = %u, w = %u, h = %u)", windowInfo.WindowRect.X, windowInfo.WindowRect.Y, windowInfo.WindowRect.Width, windowInfo.WindowRect.Height);
 		Window_Create(&windowInfo);
 	}
 
@@ -288,9 +325,6 @@ int AppMain(int argc, char** argv, hg::IApplication* pApp)
 		pApp->Update(deltaSeconds);
 		pApp->Render();
 	}
-
-	// Shutdown subsystems
-	Console_Shutdown(&g_consoleInfo);
 
 	// Shutdown application
 	pApp->Shutdown();

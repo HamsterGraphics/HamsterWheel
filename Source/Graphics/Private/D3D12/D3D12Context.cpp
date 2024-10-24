@@ -11,6 +11,8 @@
 #include "IGraphics.h"
 #include "IOperatingSystem.h"
 
+#include "D3D12MemoryAllocator/D3D12MemAlloc.h"
+
 #if defined(HG_GFX_DYNAMIC_API)
 typedef HRESULT (WINAPI *PFN_D3D12CreateDevice)(_In_opt_ void* pAdapter, D3D_FEATURE_LEVEL MinimumFeatureLevel, _In_ REFIID riid, _COM_Outptr_opt_ void** ppDevice);
 typedef HRESULT (WINAPI *PFN_D3D12GetDebugInterface)(_In_ REFIID riid, _COM_Outptr_opt_ void** ppvDebug);

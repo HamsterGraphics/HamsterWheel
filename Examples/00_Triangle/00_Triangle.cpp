@@ -16,7 +16,6 @@ public:
 	virtual bool InitSettings() override
 	{
 		memset(&AppSettings, 0, sizeof(AppSettings));
-		AppSettings.EnableConsole = true;
 		return true;
 	}
 

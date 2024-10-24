@@ -29,7 +29,6 @@
 ///////////////////////////////////////////////////////
 #include <d3d12.h>
 #include <dxgi1_6.h>
-#include <D3D12MemoryAllocator/D3D12MemAlloc.h>
 
 #if defined(HG_GFX_ENABLE_DEBUG)
 #include <dxgidebug.h>
@@ -43,6 +42,13 @@ typedef struct GraphicsDebugContextCreateInfo
 #define D3D12_SUCCEED(result) (HRESULT)result >= 0
 #define D3D12_FAILED(result) (HRESULT)result < 0
 #define D3D12_VERIFY(result) Assert((HRESULT)result >= 0)
+
+namespace D3D12MA
+{
+
+class Allocator;
+
+}
 
 typedef struct DescriptorHeap
 {

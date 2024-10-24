@@ -36,24 +36,13 @@ int64 Time_QueryCounter()
 ///////////////////////////////////////////////////////////////////////////////////
 bool Console_Init(ConsoleInfo* pInfo)
 {
+	FILE* crtIO;
+	freopen_s(&crtIO, "CONIN$", "r", stdin);
+	freopen_s(&crtIO, "CONOUT$", "w", stdout);
+	freopen_s(&crtIO, "CONOUT$", "w", stderr);
 	pInfo->OutputHandle = ::GetStdHandle(STD_OUTPUT_HANDLE);
 	pInfo->WindowHandle = ::GetConsoleWindow();
 	return true;
-}
-
-void Console_Shutdown(ConsoleInfo* pInfo)
-{
-	::CloseHandle((HANDLE)pInfo->OutputHandle);
-}
-
-void Console_Show(ConsoleInfo* pInfo)
-{
-	::ShowWindow((HWND)pInfo->WindowHandle, SW_SHOW);
-}
-
-void Console_Hide(ConsoleInfo* pInfo)
-{
-	::ShowWindow((HWND)pInfo->WindowHandle, SW_HIDE);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
