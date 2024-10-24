@@ -60,6 +60,7 @@ typedef struct DescriptorHeap
 typedef struct GraphicsContextCreateInfo
 {
 	D3D_FEATURE_LEVEL FeatureLevel;
+	bool StablePowerMode;
 #if defined(HG_GFX_ENABLE_DEBUG)
 	GraphicsDebugContextCreateInfo Debug;
 #endif
@@ -73,6 +74,7 @@ typedef struct GraphicsContext
 #if defined(HG_GFX_ENABLE_DEBUG)
 	ID3D12Debug* Debug;
 	ID3D12InfoQueue1* InfoQueue;
+	DWORD CallbackCookie;
 #endif
 } GraphicsContext;
 
