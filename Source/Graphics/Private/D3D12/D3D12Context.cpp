@@ -206,7 +206,7 @@ void Graphics_InitDevice(GraphicsContext* pContext)
 	}
 #endif
 
-	LOG_TRACE("Init d3d12 memory allocator");
+	LOG_TRACE("Init d3d12 resource allocator");
 	D3D12MA::ALLOCATOR_DESC desc = {};
 	desc.Flags = D3D12MA::ALLOCATOR_FLAG_NONE;
 	desc.pDevice = pContext->Device;
@@ -238,23 +238,30 @@ bool Graphics_Init(const GraphicsContextCreateInfo& createInfo, GraphicsContext*
 
 	Graphics_InitDevice(pContext);
 
+	if (createInfo.StablePowerMode)
+	{
+		LOG_TRACE("Enable d3d12 stable power mode");
+		D3D12_VERIFY(Graphics_D3D12EnableExperimentalFeatures(0, nullptr, nullptr, nullptr));
+		D3D12_VERIFY(pContext->Device->SetStablePowerState(TRUE));
+	}
+
 	return true;
 }
 
 void Graphics_Shutdown(GraphicsContext* pContext)
 {
-	LOG_TRACE("Shutdown d3d12 factory");
-	if (pContext->Factory)
-	{
-		pContext->Factory->Release();
-		pContext->Factory = nullptr;
-	}
-
 	LOG_TRACE("Shutdown d3d12 device");
 	if (pContext->Device)
 	{
 		pContext->Device->Release();
 		pContext->Device = nullptr;
+	}
+
+	LOG_TRACE("Shutdown d3d12 factory");
+	if (pContext->Factory)
+	{
+		pContext->Factory->Release();
+		pContext->Factory = nullptr;
 	}
 
 #if defined(HG_GFX_ENABLE_DEBUG)
