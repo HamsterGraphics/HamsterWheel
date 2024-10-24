@@ -22,8 +22,10 @@ public:
 
 	RefCountObject(const RefCountObject& other) = delete;
 	RefCountObject& operator=(const RefCountObject& other) = delete;
-	RefCountObject(RefCountObject&& other) = default;
-	RefCountObject& operator=(RefCountObject&& other) = default;
+	// std::atomic doesn't define move constructor/assign operator.
+	// https://stackoverflow.com/questions/14182258/c11-write-move-constructor-with-atomicbool-member
+	RefCountObject(RefCountObject&& other) = delete;
+	RefCountObject& operator=(RefCountObject&& other) = delete;
 
 	virtual ~RefCountObject()
 	{
