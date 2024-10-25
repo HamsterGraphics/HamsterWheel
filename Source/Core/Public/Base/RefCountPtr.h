@@ -311,4 +311,13 @@ RefCountPtr<T> MakeRefCountPtr(Args&&... args)
 	return RefCountPtr<T>(new T(Forward<Args>(args)...));
 }
 
+template<typename T>
+void SafeRelease(T*& resource)
+{
+	if (resource != nullptr) {
+		resource->Release();
+		resource = nullptr;
+	}
+}
+
 }

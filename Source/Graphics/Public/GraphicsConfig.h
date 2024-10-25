@@ -12,6 +12,9 @@
 #include "Base/BasicTypes.h"
 #include "Base/PlatformDefines.h"
 #include "Base/RefCountPtr.h"
+#include "IOperatingSystem.h"
+
+#include <string>
 
 #if defined(HG_GFX_EXPORT)
 #define HG_GFX_API API_EXPORT
@@ -22,6 +25,9 @@
 #define HG_GFX_API
 #endif
 #endif
+
+#define MAX_GPU_COUNT 4
+#define MAX_GPU_NAME_LENGTH 128
 
 #if defined(HG_GFX_BACKEND_D3D12)
 ///////////////////////////////////////////////////////
@@ -41,66 +47,71 @@ typedef struct GraphicsDebugContextCreateInfo
 
 #define D3D12_SUCCEED(result) (HRESULT)result >= 0
 #define D3D12_FAILED(result) (HRESULT)result < 0
-#define D3D12_VERIFY(result) Assert((HRESULT)result >= 0)
 
-namespace D3D12MA
+inline std::string GetErrorString(HRESULT errorCode, ID3D12Device* pDevice)
 {
+	std::string str;
+	char* errorMsg;
+	if (::FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+		nullptr, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		(LPSTR)&errorMsg, 0, nullptr) != 0)
+	{
+		str += errorMsg;
+		LocalFree(errorMsg);
+	}
 
-class Allocator;
-
+	return str;
 }
 
-typedef struct DescriptorHeap
+inline void LogHRESULT(HRESULT result, ID3D12Device* pDevice, const char* pCode, const char* pFileName, uint32 lineNumber)
 {
-	ID3D12DescriptorHeap* Heap;
-	D3D12_CPU_DESCRIPTOR_HANDLE StartCpuHandle;
-	D3D12_GPU_DESCRIPTOR_HANDLE StartGpuHandle;
-} DescriptorHeap;
+	if (D3D12_FAILED(result))
+	{
+		LOG_FATAL("%s:%d: %s - %s", pFileName, lineNumber, GetErrorString(result, pDevice).c_str(), pCode);
+	}
+}
 
+#define D3D12_VERIFY(result) LogHRESULT(result, nullptr, #result, __FILE__, __LINE__)
+
+// Forward Declaration
+namespace D3D12MA
+{
+class Allocator;
+}
+
+struct DescriptorHeap;
+
+#endif
+
+///////////////////////////////////////////////////////
+// API Types
+///////////////////////////////////////////////////////
 typedef struct GraphicsContextCreateInfo
 {
+#if defined(HG_GFX_BACKEND_D3D12)
 	D3D_FEATURE_LEVEL FeatureLevel;
+	bool EnableStablePowerMode;
 #if defined(HG_GFX_ENABLE_DEBUG)
 	GraphicsDebugContextCreateInfo Debug;
 #endif
+
+#endif
 } GraphicsContextCreateInfo;
 
 typedef struct GraphicsContext
 {
+#if defined(HG_GFX_BACKEND_D3D12)
 	IDXGIFactory6* Factory;
 	ID3D12Device* Device;
 	D3D12MA::Allocator* ResourceAllocator;
+	DescriptorHeap** CPUDescriptorHeaps;
+	DescriptorHeap** GPUDescriptorHeaps;
+	uint32 CPUDescriptorHeapCount;
+	uint32 GPUDescriptorHeapCount;
 #if defined(HG_GFX_ENABLE_DEBUG)
 	ID3D12Debug* Debug;
 	ID3D12InfoQueue1* InfoQueue;
+	DWORD CallbackCookie;
+#endif
 #endif
 } GraphicsContext;
-
-#elif defined(HG_GFX_BACKEND_VULKAN)
-///////////////////////////////////////////////////////
-// Vulkan
-///////////////////////////////////////////////////////
-typedef struct GraphicsContextCreateInfo
-{
-} GraphicsContextCreateInfo;
-
-typedef struct GraphicsContext
-{
-} GraphicsContext;
-
-#elif defined(HG_GFX_BACKEND_METAL)
-///////////////////////////////////////////////////////
-// Metal
-///////////////////////////////////////////////////////
-typedef struct GraphicsContextCreateInfo
-{
-} GraphicsContextCreateInfo;
-
-typedef struct GraphicsContext
-{
-} GraphicsContext;
-
-#endif
-
-#define MAX_GPU_COUNT 4
-#define MAX_GPU_NAME_LENGTH 128

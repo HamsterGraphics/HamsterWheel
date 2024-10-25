@@ -227,12 +227,16 @@ int AppMain(int argc, char** argv, hg::IApplication* pApp)
 	UNUSED(argv);
 	g_pApp = pApp;
 
+	Thread_Init();
 	Console_Init(&g_consoleInfo);
 	Log_Init(&g_consoleInfo);
-	Thread_Init();
+	
+	// Init application settings
+	LOG_TRACE("Init application settings.");
+	pApp->InitSettings();
 
 	// Init subsystems
-	LOG_TRACE("Collect CPU info...");
+	LOG_TRACE("Collect CPU info.");
 	constexpr float ByteToMB = 1024.f * 1024.f;
 	CPU_InitInfo(&g_cpuInfo);
 	LOG_INFO("[CPU] %s", g_cpuInfo.Brand);
@@ -260,13 +264,13 @@ int AppMain(int argc, char** argv, hg::IApplication* pApp)
 	LOG_INFO("    [SSE41]\t= %u", g_cpuInfo.Features.SSE41);
 	LOG_INFO("    [SSE42]\t= %u", g_cpuInfo.Features.SSE42);
 
-	LOG_TRACE("Collect DRAM info...");
+	LOG_TRACE("Collect DRAM info.");
 	DRAM_InitInfo(&g_dramInfo);
 	LOG_INFO("[DRAM]");
 	LOG_INFO("  AvailableSize = %.3f MB", g_dramInfo.AvailableSize / ByteToMB);
 	LOG_INFO("  TotalSize = %.3f MB", g_dramInfo.TotalSize / ByteToMB);
 
-	LOG_TRACE("Collect Monitor info...");
+	LOG_TRACE("Collect Monitor info.");
 	Monitor_InitInfo(g_monitorInfo, g_monitorCount);
 	for (uint32 monitorIndex = 0; monitorIndex < g_monitorCount; ++monitorIndex)
 	{
@@ -283,16 +287,10 @@ int AppMain(int argc, char** argv, hg::IApplication* pApp)
 	Power_UpdateStatus(&g_powerInfo);
 	Time_Init(&g_timeInfo);
 
-	// Init application settings
-	LOG_TRACE("Init application settings...");
-	pApp->InitSettings();
 	auto& appSettings = pApp->AppSettings;
 	Input_Init(&g_inputInfo);
 	Window_Init(WindowProc);
 	
-	// Init application
-	pApp->Init();
-
 	// Create application window
 	WindowInfo windowInfo;
 	memset(&windowInfo, 0, sizeof(windowInfo));
@@ -300,7 +298,7 @@ int AppMain(int argc, char** argv, hg::IApplication* pApp)
 	Window_AdjustRect(appSettings, windowInfo);
 	if (!appSettings.Faceless)
 	{
-		LOG_TRACE("Create application window...");
+		LOG_TRACE("Create application window.");
 		LOG_INFO("[Window] %s", windowInfo.Name);
 		LOG_INFO("  FullScreen = %u", windowInfo.FullScreen);
 		LOG_INFO("  Borderless = %u", windowInfo.Borderless);
@@ -311,7 +309,11 @@ int AppMain(int argc, char** argv, hg::IApplication* pApp)
 		Window_Create(&windowInfo);
 	}
 
+	// Init application
+	pApp->Init();
+
 	// Loop
+	LOG_TRACE("Start application loop.");
 	int64 lastCounter = Time_QueryCounter();
 	bool quit = false;
 	while (!quit)
@@ -328,6 +330,7 @@ int AppMain(int argc, char** argv, hg::IApplication* pApp)
 
 	// Shutdown application
 	pApp->Shutdown();
+	LOG_TRACE("Shutdown application.");
 
 	return 0;
 }

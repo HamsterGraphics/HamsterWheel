@@ -7,9 +7,9 @@
 
 #include "D3D12Context.h"
 
+#include "Base/NameOf.h"
 #include "Containers/Vector.h"
 #include "IGraphics.h"
-#include "IOperatingSystem.h"
 
 #include "D3D12MemoryAllocator/D3D12MemAlloc.h"
 
@@ -34,6 +34,7 @@ static PFN_DXGIGetDebugInterface1 g_DXGIGetDebugInterface1;
 
 void LoadD3D12API()
 {
+	LOG_TRACE("Loading d3d12.dll.");
 	g_pD3D12Module = Module_Load("d3d12.dll");
 	Assert(g_pD3D12Module != nullptr);
 	g_D3D12CreateDevice = (PFN_D3D12CreateDevice)Module_GetFunctionAddress(g_pD3D12Module, "D3D12CreateDevice");
@@ -45,6 +46,7 @@ void LoadD3D12API()
 	Assert(g_D3D12EnableExperimentalFeatures != nullptr);
 	Assert(g_D3D12SerializeVersionedRootSignature != nullptr);
 
+	LOG_TRACE("Loading dxgi.dll.");
 	g_pDXGIModule = Module_Load("dxgi.dll");
 	g_CreateDXGIFactory2 = (PFN_CreateDXGIFactory2)Module_GetFunctionAddress(g_pDXGIModule, "CreateDXGIFactory2");
 	g_DXGIGetDebugInterface1 = (PFN_DXGIGetDebugInterface1)Module_GetFunctionAddress(g_pDXGIModule, "DXGIGetDebugInterface1");
@@ -53,6 +55,7 @@ void LoadD3D12API()
 
 void UnloadD3D12API()
 {
+	LOG_TRACE("Unloading d3d12.dll.");
 	Module_Unload(g_pD3D12Module);
 	g_pD3D12Module = nullptr;
 	g_D3D12CreateDevice = nullptr;
@@ -60,6 +63,7 @@ void UnloadD3D12API()
 	g_D3D12EnableExperimentalFeatures = nullptr;
 	g_D3D12SerializeVersionedRootSignature = nullptr;
 
+	LOG_TRACE("Unloading dxgi.dll.");
 	Module_Unload(g_pDXGIModule);
 	g_pDXGIModule = nullptr;
 	g_CreateDXGIFactory2 = nullptr;
@@ -68,7 +72,7 @@ void UnloadD3D12API()
 
 #endif
 
-void Graphics_EnumAdapters(GraphicsContext* pContext, uint32* pAdapterCount, D3D12AdapterInfo* pAdaptersInfo)
+void Graphics_EnumAdapters(GraphicsContext* pContext, uint32* pAdapterCount, AdapterInfo* pAdaptersInfo)
 {
 	constexpr D3D_FEATURE_LEVEL FeatureLevelsRange[] =
 	{
@@ -136,11 +140,12 @@ void Graphics_EnumAdapters(GraphicsContext* pContext, uint32* pAdapterCount, D3D
 
 void Graphics_InitDevice(GraphicsContext* pContext)
 {
+	LOG_TRACE("Collect d3d12 adapter info.");
 	uint32 adapterCount = 0;
 	Graphics_EnumAdapters(pContext, &adapterCount, nullptr);
 	Assert(adapterCount > 0);
 
-	hg::Vector<D3D12AdapterInfo> adaptersInfo(adapterCount);
+	hg::Vector<AdapterInfo> adaptersInfo(adapterCount);
 	Graphics_EnumAdapters(pContext, &adapterCount, adaptersInfo.data());
 
 	uint32 currentAdapterIndex = 0;
@@ -148,6 +153,13 @@ void Graphics_InitDevice(GraphicsContext* pContext)
 	uint64 maxVRAM = 0;
 	for (const auto& adapterInfo : adaptersInfo)
 	{
+		LOG_INFO("[Adapter] %s", adapterInfo.Name);
+		LOG_INFO("  DeviceID = %u", adapterInfo.DeviceID);
+		LOG_INFO("  Revision = %u", adapterInfo.Revision);
+		LOG_INFO("  VendorID = %u", adapterInfo.VendorID);
+		LOG_INFO("  DedicatedVRAM = %.3f MB", adapterInfo.DedicatedVRAM / 1024.f / 1024.f);
+		LOG_INFO("  MaxFeatureLevel = 0x%x", adapterInfo.MaxFeatureLevel);
+		LOG_INFO("  MaxShaderModel = 0x%x", adapterInfo.MaxShaderModel);
 		if (adapterInfo.DedicatedVRAM > maxVRAM)
 		{
 			maxVRAM = adapterInfo.DedicatedVRAM;
@@ -156,6 +168,7 @@ void Graphics_InitDevice(GraphicsContext* pContext)
 		++currentAdapterIndex;
 	}
 
+	LOG_TRACE("Init d3d12 device.");
 	const auto& selectAdapterInfo = adaptersInfo[selectAdapterIndex];
 	D3D12_VERIFY(Graphics_D3D12CreateDevice(selectAdapterInfo.Adapter, selectAdapterInfo.MaxFeatureLevel, IID_PPV_ARGS(&pContext->Device)));
 
@@ -169,22 +182,47 @@ void Graphics_InitDevice(GraphicsContext* pContext)
 		D3D12_VERIFY(pContext->InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_INFO, FALSE));
 		D3D12_VERIFY(pContext->InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_MESSAGE, FALSE));
 
-		auto MessageCallback = [](D3D12_MESSAGE_CATEGORY Category, D3D12_MESSAGE_SEVERITY Severity,
-			D3D12_MESSAGE_ID ID, LPCSTR pDescription, void* pContext)
+		auto MessageCallback = [](D3D12_MESSAGE_CATEGORY category, D3D12_MESSAGE_SEVERITY severity, D3D12_MESSAGE_ID messageID, LPCSTR pDescription, void* pContext)
+		{
+			if (severity == D3D12_MESSAGE_SEVERITY_CORRUPTION)
 			{
-				printf("D3D12 Validation Layer: %s\n", pDescription);
-			};
-
-		DWORD callbackCookie = 0;
-		D3D12_VERIFY(pContext->InfoQueue->RegisterMessageCallback(MessageCallback, D3D12_MESSAGE_CALLBACK_FLAG_NONE, nullptr, &callbackCookie));
+				LOG_ERROR("[Corruption] [%d] : %s (%d)", category, pDescription, messageID);
+			}
+			else if (severity == D3D12_MESSAGE_SEVERITY_ERROR)
+			{
+				LOG_ERROR("[%d] : %s (%d)", category, pDescription, messageID);
+			}
+			else if (severity == D3D12_MESSAGE_SEVERITY_WARNING)
+			{
+				LOG_WARNING("[%d] : %s (%d)", category, pDescription, messageID);
+			}
+			else if (severity == D3D12_MESSAGE_SEVERITY_INFO)
+			{
+				LOG_INFO("[%d] : %s (%d)", category, pDescription, messageID);
+			}
+		};
+		D3D12_VERIFY(pContext->InfoQueue->RegisterMessageCallback(MessageCallback, D3D12_MESSAGE_CALLBACK_FLAG_NONE, nullptr, &pContext->CallbackCookie));
 	}
 #endif
 
+	LOG_TRACE("Init d3d12 resource allocator.");
 	D3D12MA::ALLOCATOR_DESC desc = {};
 	desc.Flags = D3D12MA::ALLOCATOR_FLAG_NONE;
 	desc.pDevice = pContext->Device;
 	desc.pAdapter = selectAdapterInfo.Adapter;
 	D3D12_VERIFY(D3D12MA::CreateAllocator(&desc, &pContext->ResourceAllocator));
+}
+
+void Graphics_InitDescriptorHeaps(GraphicsContext* pContext)
+{
+	pContext->CPUDescriptorHeapCount = D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES;
+	pContext->CPUDescriptorHeaps;
+
+	// D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV + D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER
+	pContext->GPUDescriptorHeapCount = 2;
+	pContext->GPUDescriptorHeaps;
+
+	// DescriptorHeap_Init;
 }
 
 bool Graphics_Init(const GraphicsContextCreateInfo& createInfo, GraphicsContext* pContext)
@@ -195,6 +233,7 @@ bool Graphics_Init(const GraphicsContextCreateInfo& createInfo, GraphicsContext*
 
 	uint32 factoryFlags = 0;
 #if defined(HG_GFX_ENABLE_DEBUG)
+	LOG_TRACE("Init d3d12 debug layer.");
 	factoryFlags = DXGI_CREATE_FACTORY_DEBUG;
 	D3D12_VERIFY(Graphics_D3D12GetDebugInterface(IID_PPV_ARGS(&pContext->Debug)));
 	pContext->Debug->EnableDebugLayer();
@@ -205,38 +244,48 @@ bool Graphics_Init(const GraphicsContextCreateInfo& createInfo, GraphicsContext*
 	pDebug1->SetEnableSynchronizedCommandQueueValidation(createInfo.Debug.EnableSynchronizedCommandQueueValidation);
 #endif
 
+	LOG_TRACE("Init dxgi factory.");
 	D3D12_VERIFY(Graphics_CreateDXGIFactory2(factoryFlags, IID_PPV_ARGS(&pContext->Factory)));
+
 	Graphics_InitDevice(pContext);
+
+	if (createInfo.EnableStablePowerMode)
+	{
+		D3D12_VERIFY(Graphics_D3D12EnableExperimentalFeatures(0, nullptr, nullptr, nullptr));
+		// In Windows, you need to open Developer mode at first.
+		if (D3D12_FAILED(pContext->Device->SetStablePowerState(TRUE)))
+		{
+			LOG_ERROR("Failed to enable d3d12 stable power mode. Check if you are in Windows Developer mode.");
+		}
+		else
+		{
+			LOG_TRACE("Succeed to enable d3d12 stable power mode.");
+		}
+	}
+
+	Graphics_InitDescriptorHeaps(pContext);
+
 	return true;
 }
 
 void Graphics_Shutdown(GraphicsContext* pContext)
 {
-	if (pContext->Factory)
-	{
-		pContext->Factory->Release();
-		pContext->Factory = nullptr;
-	}
-	
-	if (pContext->Device)
-	{
-		pContext->Device->Release();
-		pContext->Device = nullptr;
-	}
+	LOG_TRACE("Shutdown d3d12 device.");
+	hg::SafeRelease(pContext->Device);
+	LOG_TRACE("Shutdown d3d12 factory.");
+	hg::SafeRelease(pContext->Factory);
 
 #if defined(HG_GFX_ENABLE_DEBUG)
-	if (pContext->Debug)
-	{
-		pContext->Debug->Release();
-		pContext->Debug = nullptr;
-	}
+	LOG_TRACE("Shutdown d3d12 debug layer.");
+	hg::SafeRelease(pContext->Debug);
 	
 	if (pContext->InfoQueue)
 	{
-		pContext->InfoQueue->Release();
-		pContext->InfoQueue = nullptr;
+		pContext->InfoQueue->UnregisterMessageCallback(pContext->CallbackCookie);
 	}
+	hg::SafeRelease(pContext->InfoQueue);
 
+	LOG_TRACE("Report d3d12 live objects.");
 	hg::RefCountPtr<IDXGIDebug1> pDebug1;
 	D3D12_VERIFY(Graphics_DXGIGetDebugInterface1(0, IID_PPV_ARGS(&pDebug1)));
 	pDebug1->ReportLiveObjects(IID_DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_DETAIL | DXGI_DEBUG_RLO_SUMMARY | DXGI_DEBUG_RLO_IGNORE_INTERNAL));

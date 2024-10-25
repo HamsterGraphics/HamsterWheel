@@ -69,3 +69,27 @@ void Thread_Detach(ThreadInfo* pInfo)
 {
 	::CloseHandle((HANDLE)pInfo->ThreadHandle);
 }
+
+///////////////////////////////////////////////////////////////////////////////////
+// Mutex
+///////////////////////////////////////////////////////////////////////////////////
+bool Mutex_Init(Mutex* pMutex)
+{
+	return ::InitializeCriticalSectionAndSpinCount((CRITICAL_SECTION*)&pMutex->Handle, pMutex->SpinCount);
+}
+
+void Mutex_Destroy(Mutex* pMutex)
+{
+	::DeleteCriticalSection((CRITICAL_SECTION*)&pMutex->Handle);
+	memset(&pMutex->Handle, 0, sizeof(pMutex->Handle));
+}
+
+void Mutex_Acquire(Mutex* pMutex)
+{
+	::EnterCriticalSection((CRITICAL_SECTION*)&pMutex->Handle);
+}
+
+void Mutex_Release(Mutex* pMutex)
+{
+	::LeaveCriticalSection((CRITICAL_SECTION*)&pMutex->Handle);
+}

@@ -118,10 +118,12 @@ typedef enum LogLevel
 	LOG_LEVEL_INFO,
 	LOG_LEVEL_TRACE,
 	LOG_LEVEL_WARNING,
-	LOG_LEVEL_ERROR
+	LOG_LEVEL_ERROR,
+	LOG_LEVEL_FATAL
 } LogLevel;
 
-C_ABI HG_OS_API void HG_CALLDECL Log_Init(ConsoleInfo* pInfo);
+C_ABI HG_OS_API bool HG_CALLDECL Log_Init(ConsoleInfo* pInfo);
+C_ABI HG_OS_API void HG_CALLDECL Log_Shutdown();
 C_ABI HG_OS_API void HG_CALLDECL Log_PrintFormat(LogLevel level, const char* format, ...);
 
 #if 1
@@ -129,11 +131,13 @@ C_ABI HG_OS_API void HG_CALLDECL Log_PrintFormat(LogLevel level, const char* for
 #define LOG_TRACE(format, ...) Log_PrintFormat(LOG_LEVEL_TRACE, format, __VA_ARGS__)
 #define LOG_WARNING(format, ...) Log_PrintFormat(LOG_LEVEL_WARNING, format, __VA_ARGS__)
 #define LOG_ERROR(format, ...) Log_PrintFormat(LOG_LEVEL_ERROR, format, __VA_ARGS__)
+#define LOG_FATAL(format, ...) Log_PrintFormat(LOG_LEVEL_FATAL, format, __VA_ARGS__)
 #else
 #define LOG_INFO
 #define LOG_TRACE
 #define LOG_WARNING
 #define LOG_ERROR
+#define LOG_FATAL
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -169,3 +173,45 @@ C_ABI HG_OS_API void HG_CALLDECL Thread_Sleep(uint32 seconds);
 C_ABI HG_OS_API bool HG_CALLDECL Thread_Create(ThreadInfo* pInfo);
 C_ABI HG_OS_API void HG_CALLDECL Thread_Join(ThreadInfo* pInfo);
 C_ABI HG_OS_API void HG_CALLDECL Thread_Detach(ThreadInfo* pInfo);
+
+///////////////////////////////////////////////////////////////////////////////////
+// Mutex
+///////////////////////////////////////////////////////////////////////////////////
+typedef struct Mutex
+{
+#if defined(HG_PLATFORM_WINDOWS)
+	CRITICAL_SECTION Handle;
+#else
+	pthread_mutex_t Handle;
+#endif
+	uint32 SpinCount = 2000;
+} Mutex;
+
+C_ABI HG_OS_API bool HG_CALLDECL Mutex_Init(Mutex* pMutex);
+C_ABI HG_OS_API void HG_CALLDECL Mutex_Destroy(Mutex* pMutex);
+C_ABI HG_OS_API void HG_CALLDECL Mutex_Acquire(Mutex* pMutex);
+C_ABI HG_OS_API void HG_CALLDECL Mutex_Release(Mutex* pMutex);
+
+#if defined(__cplusplus)
+
+class ScopedLock
+{
+public:
+	explicit ScopedLock(Mutex& mutex) : m_mutex(mutex)
+	{
+		Mutex_Acquire(&m_mutex);
+	}
+
+	ScopedLock(const ScopedLock&) = delete;
+	ScopedLock& operator=(const ScopedLock&) = delete;
+
+	~ScopedLock() noexcept
+	{
+		Mutex_Release(&m_mutex);
+	}
+
+private:
+	Mutex& m_mutex;
+};
+
+#endif
