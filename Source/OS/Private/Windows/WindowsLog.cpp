@@ -66,6 +66,14 @@ void Log_Init(ConsoleInfo* pInfo)
 		logStyle.PrefixLength = COUNTOF(prefix);
 		logStyle.Attribute = FOREGROUND_RED | FOREGROUND_INTENSITY;
 	}
+
+	{
+		auto& logStyle = LogStyles[LOG_LEVEL_FATAL];
+		constexpr char prefix[] = "[FATAL] ";
+		strcpy_s(logStyle.Prefix, MAX_LOG_PREFIX_BUFFER_LENGTH, prefix);
+		logStyle.PrefixLength = COUNTOF(prefix);
+		logStyle.Attribute = FOREGROUND_RED | FOREGROUND_INTENSITY;
+	}
 }
 
 void Log_PrintFormat(LogLevel level, const char* format, ...)
@@ -85,4 +93,9 @@ void Log_PrintFormat(LogLevel level, const char* format, ...)
 	::OutputDebugStringA(g_messageBuffer);
 
 	::SetConsoleTextAttribute(g_consoleHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+
+	if (LOG_LEVEL_FATAL == level)
+	{
+		HG_BREAKPOINT;
+	}
 }

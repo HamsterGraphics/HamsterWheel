@@ -10,7 +10,6 @@
 #include "Base/NameOf.h"
 #include "Containers/Vector.h"
 #include "IGraphics.h"
-#include "IOperatingSystem.h"
 
 #include "D3D12MemoryAllocator/D3D12MemAlloc.h"
 

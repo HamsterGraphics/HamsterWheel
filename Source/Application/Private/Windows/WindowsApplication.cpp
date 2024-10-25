@@ -227,9 +227,13 @@ int AppMain(int argc, char** argv, hg::IApplication* pApp)
 	UNUSED(argv);
 	g_pApp = pApp;
 
+	Thread_Init();
 	Console_Init(&g_consoleInfo);
 	Log_Init(&g_consoleInfo);
-	Thread_Init();
+	
+	// Init application settings
+	LOG_TRACE("Init application settings");
+	pApp->InitSettings();
 
 	// Init subsystems
 	LOG_TRACE("Collect CPU info");
@@ -283,9 +287,6 @@ int AppMain(int argc, char** argv, hg::IApplication* pApp)
 	Power_UpdateStatus(&g_powerInfo);
 	Time_Init(&g_timeInfo);
 
-	// Init application settings
-	LOG_TRACE("Init application settings");
-	pApp->InitSettings();
 	auto& appSettings = pApp->AppSettings;
 	Input_Init(&g_inputInfo);
 	Window_Init(WindowProc);

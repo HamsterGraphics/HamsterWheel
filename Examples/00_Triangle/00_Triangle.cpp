@@ -24,7 +24,7 @@ public:
 	{
 		LOG_TRACE("Init graphics backend");
 		m_graphicsContext = std::make_unique<GraphicsContext>();
-		GraphicsContextCreateInfo contextCreateInfo;
+		GraphicsContextCreateInfo contextCreateInfo = {};
 		contextCreateInfo.Debug.EnableGPUBasedValidation = true;
 		contextCreateInfo.Debug.EnableSynchronizedCommandQueueValidation = false;
 		Graphics_Init(contextCreateInfo, m_graphicsContext.get());
