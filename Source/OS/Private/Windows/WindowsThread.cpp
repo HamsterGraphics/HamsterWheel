@@ -73,10 +73,9 @@ void Thread_Detach(ThreadInfo* pInfo)
 ///////////////////////////////////////////////////////////////////////////////////
 // Mutex
 ///////////////////////////////////////////////////////////////////////////////////
-bool Mutex_Create(Mutex* pMutex)
+bool Mutex_Init(Mutex* pMutex)
 {
-	constexpr uint64 DefaultSpinCount = 32;
-	return ::InitializeCriticalSectionAndSpinCount((CRITICAL_SECTION*)&pMutex->Handle, (DWORD)DefaultSpinCount);
+	return ::InitializeCriticalSectionAndSpinCount((CRITICAL_SECTION*)&pMutex->Handle, pMutex->SpinCount);
 }
 
 void Mutex_Destroy(Mutex* pMutex)

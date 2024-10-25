@@ -41,7 +41,7 @@ project("Graphics")
 
 	files {
 		path.join(SourcePath, "Graphics/Public/**.*"),
-		path.join(SourcePath, "Graphics/ThirdParty/D3D12MemoryAllocator/D3D12MemAlloc.cpp"),
+		path.join(SourcePath, "Graphics/ThirdParty/D3D12MemoryAllocator/D3D12MemAlloc.*"),
 		path.join(SourcePath, "Graphics/Private/"..GfxBackendName.."/**.*")
 	}
 

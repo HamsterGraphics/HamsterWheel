@@ -30,7 +30,7 @@ static LogLevelStyle LogStyles[hg::EnumCount<LogLevel>()];
 
 bool Log_Init(ConsoleInfo* pInfo)
 {
-	Mutex_Create(&g_logMutex);
+	Mutex_Init(&g_logMutex);
 	g_consoleHandle = (HANDLE)pInfo->OutputHandle;
 	Assert(g_consoleHandle != NULL);
 
@@ -84,7 +84,7 @@ void Log_Shutdown()
 
 void Log_PrintFormat(LogLevel level, const char* format, ...)
 {
-	ScopedMutexLock mutexLock(g_logMutex);
+	ScopedLock mutexLock(g_logMutex);
 
 	const auto& logStyle = LogStyles[level];
 	strcpy_s(g_messageBuffer, logStyle.PrefixLength, logStyle.Prefix);
@@ -96,7 +96,9 @@ void Log_PrintFormat(LogLevel level, const char* format, ...)
 	va_end(args);
 
 	printf("%s\n", g_messageBuffer);
+#ifdef _DEBUG
 	::OutputDebugStringA(g_messageBuffer);
+#endif
 
 	::SetConsoleTextAttribute(g_consoleHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
 

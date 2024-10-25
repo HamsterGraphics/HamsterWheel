@@ -20,6 +20,9 @@ HRESULT WINAPI Graphics_DXGIGetDebugInterface1(UINT Flags, REFIID riid, _COM_Out
 static const GUID IID_DXGI_DEBUG_ALL = { 0xe48ae283, 0xda80, 0x490b, { 0x87, 0xe6, 0x43, 0xe9, 0xa9, 0xcf, 0xda, 0x89 } };
 #endif
 
+///////////////////////////////////////////////////////
+// Adapter
+///////////////////////////////////////////////////////
 typedef struct AdapterInfo
 {
 	hg::RefCountPtr<IDXGIAdapter4> Adapter;
@@ -32,9 +35,18 @@ typedef struct AdapterInfo
 	char Name[MAX_GPU_NAME_LENGTH];
 } D3D12GPUInfo;
 
+///////////////////////////////////////////////////////
+// DescriptorHeap
+///////////////////////////////////////////////////////
 typedef struct DescriptorHeap
 {
 	ID3D12DescriptorHeap* Heap;
+	ID3D12Device* Device;
 	D3D12_CPU_DESCRIPTOR_HANDLE CPUStart;
 	D3D12_GPU_DESCRIPTOR_HANDLE GPUStart;
+	D3D12_DESCRIPTOR_HEAP_TYPE HeapType;
+	uint32 IncrementSize;
+	Mutex HeapMutex;
 } DescriptorHeap;
+
+void DescriptorHeap_Init(DescriptorHeap* pDescriptorHeap, ID3D12Device* pDevice, const D3D12_DESCRIPTOR_HEAP_DESC& desc);

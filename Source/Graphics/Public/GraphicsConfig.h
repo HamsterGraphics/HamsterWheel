@@ -73,56 +73,45 @@ inline void LogHRESULT(HRESULT result, ID3D12Device* pDevice, const char* pCode,
 
 #define D3D12_VERIFY(result) LogHRESULT(result, nullptr, #result, __FILE__, __LINE__)
 
+// Forward Declaration
 namespace D3D12MA
 {
-
 class Allocator;
-
 }
 
+struct DescriptorHeap;
+
+#endif
+
+///////////////////////////////////////////////////////
+// API Types
+///////////////////////////////////////////////////////
 typedef struct GraphicsContextCreateInfo
 {
+#if defined(HG_GFX_BACKEND_D3D12)
 	D3D_FEATURE_LEVEL FeatureLevel;
 	bool EnableStablePowerMode;
 #if defined(HG_GFX_ENABLE_DEBUG)
 	GraphicsDebugContextCreateInfo Debug;
 #endif
+
+#endif
 } GraphicsContextCreateInfo;
 
 typedef struct GraphicsContext
 {
+#if defined(HG_GFX_BACKEND_D3D12)
 	IDXGIFactory6* Factory;
 	ID3D12Device* Device;
 	D3D12MA::Allocator* ResourceAllocator;
+	DescriptorHeap** CPUDescriptorHeaps;
+	DescriptorHeap** GPUDescriptorHeaps;
+	uint32 CPUDescriptorHeapCount;
+	uint32 GPUDescriptorHeapCount;
 #if defined(HG_GFX_ENABLE_DEBUG)
 	ID3D12Debug* Debug;
 	ID3D12InfoQueue1* InfoQueue;
 	DWORD CallbackCookie;
 #endif
-} GraphicsContext;
-
-#elif defined(HG_GFX_BACKEND_VULKAN)
-///////////////////////////////////////////////////////
-// Vulkan
-///////////////////////////////////////////////////////
-typedef struct GraphicsContextCreateInfo
-{
-} GraphicsContextCreateInfo;
-
-typedef struct GraphicsContext
-{
-} GraphicsContext;
-
-#elif defined(HG_GFX_BACKEND_METAL)
-///////////////////////////////////////////////////////
-// Metal
-///////////////////////////////////////////////////////
-typedef struct GraphicsContextCreateInfo
-{
-} GraphicsContextCreateInfo;
-
-typedef struct GraphicsContext
-{
-} GraphicsContext;
-
 #endif
+} GraphicsContext;

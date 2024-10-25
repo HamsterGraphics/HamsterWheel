@@ -220,12 +220,3 @@ typedef struct GPUInfo
 ///////////////////////////////////////////////////////
 C_ABI HG_GFX_API bool HG_CALLDECL Graphics_Init(const GraphicsContextCreateInfo& createInfo, GraphicsContext* pContext);
 C_ABI HG_GFX_API void HG_CALLDECL Graphics_Shutdown(GraphicsContext* pContext);
-
-///////////////////////////////////////////////////////
-// Instance
-///////////////////////////////////////////////////////
-typedef struct InstanceInfo
-{
-} InstanceInfo;
-
-C_ABI HG_GFX_API bool HG_CALLDECL Graphics_CreateInstance(InstanceInfo* pInfo);

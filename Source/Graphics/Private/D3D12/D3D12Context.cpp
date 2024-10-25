@@ -213,6 +213,18 @@ void Graphics_InitDevice(GraphicsContext* pContext)
 	D3D12_VERIFY(D3D12MA::CreateAllocator(&desc, &pContext->ResourceAllocator));
 }
 
+void Graphics_InitDescriptorHeaps(GraphicsContext* pContext)
+{
+	pContext->CPUDescriptorHeapCount = D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES;
+	pContext->CPUDescriptorHeaps;
+
+	// D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV + D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER
+	pContext->GPUDescriptorHeapCount = 2;
+	pContext->GPUDescriptorHeaps;
+
+	// DescriptorHeap_Init;
+}
+
 bool Graphics_Init(const GraphicsContextCreateInfo& createInfo, GraphicsContext* pContext)
 {
 #if defined(HG_GFX_DYNAMIC_API)
@@ -250,6 +262,8 @@ bool Graphics_Init(const GraphicsContextCreateInfo& createInfo, GraphicsContext*
 			LOG_TRACE("Succeed to enable d3d12 stable power mode.");
 		}
 	}
+
+	Graphics_InitDescriptorHeaps(pContext);
 
 	return true;
 }

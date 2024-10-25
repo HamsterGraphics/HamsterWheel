@@ -183,29 +183,29 @@ typedef struct Mutex
 	CRITICAL_SECTION Handle;
 #else
 	pthread_mutex_t Handle;
-	uint32 SpinCount;
 #endif
+	uint32 SpinCount = 2000;
 } Mutex;
 
-C_ABI HG_OS_API bool HG_CALLDECL Mutex_Create(Mutex* pMutex);
+C_ABI HG_OS_API bool HG_CALLDECL Mutex_Init(Mutex* pMutex);
 C_ABI HG_OS_API void HG_CALLDECL Mutex_Destroy(Mutex* pMutex);
 C_ABI HG_OS_API void HG_CALLDECL Mutex_Acquire(Mutex* pMutex);
 C_ABI HG_OS_API void HG_CALLDECL Mutex_Release(Mutex* pMutex);
 
 #if defined(__cplusplus)
 
-class ScopedMutexLock
+class ScopedLock
 {
 public:
-	explicit ScopedMutexLock(Mutex& mutex) : m_mutex(mutex)
+	explicit ScopedLock(Mutex& mutex) : m_mutex(mutex)
 	{
 		Mutex_Acquire(&m_mutex);
 	}
 
-	ScopedMutexLock(const ScopedMutexLock&) = delete;
-	ScopedMutexLock& operator=(const ScopedMutexLock&) = delete;
+	ScopedLock(const ScopedLock&) = delete;
+	ScopedLock& operator=(const ScopedLock&) = delete;
 
-	~ScopedMutexLock() noexcept
+	~ScopedLock() noexcept
 	{
 		Mutex_Release(&m_mutex);
 	}

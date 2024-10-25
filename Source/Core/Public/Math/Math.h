@@ -80,3 +80,13 @@ typedef struct AABB
 	Vec2 Min;
 	Vec2 Max;
 } AABB;
+
+inline constexpr uint32 RoundUp(uint32 value, uint32 multiple)
+{
+	return ((value + multiple - 1) / multiple) * multiple;
+}
+
+inline constexpr uint32 RoundDown(uint32 value, uint32 multiple)
+{
+	return value - value % multiple;
+}
