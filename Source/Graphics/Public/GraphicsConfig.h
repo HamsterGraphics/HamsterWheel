@@ -26,6 +26,9 @@
 #endif
 #endif
 
+#define MAX_GPU_COUNT 4
+#define MAX_GPU_NAME_LENGTH 128
+
 #if defined(HG_GFX_BACKEND_D3D12)
 ///////////////////////////////////////////////////////
 // D3D12
@@ -77,17 +80,10 @@ class Allocator;
 
 }
 
-typedef struct DescriptorHeap
-{
-	ID3D12DescriptorHeap* Heap;
-	D3D12_CPU_DESCRIPTOR_HANDLE StartCpuHandle;
-	D3D12_GPU_DESCRIPTOR_HANDLE StartGpuHandle;
-} DescriptorHeap;
-
 typedef struct GraphicsContextCreateInfo
 {
 	D3D_FEATURE_LEVEL FeatureLevel;
-	bool StablePowerMode;
+	bool EnableStablePowerMode;
 #if defined(HG_GFX_ENABLE_DEBUG)
 	GraphicsDebugContextCreateInfo Debug;
 #endif
@@ -130,6 +126,3 @@ typedef struct GraphicsContext
 } GraphicsContext;
 
 #endif
-
-#define MAX_GPU_COUNT 4
-#define MAX_GPU_NAME_LENGTH 128

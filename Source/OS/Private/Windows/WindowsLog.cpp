@@ -10,8 +10,6 @@
 #include "Base/NameOf.h"
 #include "Base/TypeTraits.h"
 
-#include <mutex>
-
 ///////////////////////////////////////////////////////////////////////////////////
 // Console Log
 ///////////////////////////////////////////////////////////////////////////////////
@@ -19,7 +17,7 @@
 #define MAX_LOG_PREFIX_BUFFER_LENGTH 16
 
 static HANDLE g_consoleHandle;
-static std::mutex g_logMutex;
+static Mutex g_logMutex;
 static char g_messageBuffer[MAX_MESSAGE_BUFFER_LENGTH];
 
 typedef struct LogLevelStyle
@@ -30,8 +28,9 @@ typedef struct LogLevelStyle
 } LogLevelStyle;
 static LogLevelStyle LogStyles[hg::EnumCount<LogLevel>()];
 
-void Log_Init(ConsoleInfo* pInfo)
+bool Log_Init(ConsoleInfo* pInfo)
 {
+	Mutex_Create(&g_logMutex);
 	g_consoleHandle = (HANDLE)pInfo->OutputHandle;
 	Assert(g_consoleHandle != NULL);
 
@@ -74,11 +73,18 @@ void Log_Init(ConsoleInfo* pInfo)
 		logStyle.PrefixLength = COUNTOF(prefix);
 		logStyle.Attribute = FOREGROUND_RED | FOREGROUND_INTENSITY;
 	}
+
+	return true;
+}
+
+void Log_Shutdown()
+{
+	Mutex_Destroy(&g_logMutex);
 }
 
 void Log_PrintFormat(LogLevel level, const char* format, ...)
 {
-	std::scoped_lock lock(g_logMutex);
+	ScopedMutexLock mutexLock(g_logMutex);
 
 	const auto& logStyle = LogStyles[level];
 	strcpy_s(g_messageBuffer, logStyle.PrefixLength, logStyle.Prefix);

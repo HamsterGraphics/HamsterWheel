@@ -16,7 +16,6 @@
 #endif
 
 #define UNUSED(a) ((void)(a))
-
 #define INLINE inline
-
 #define NODISCARD [[nodiscard]]
+#define THREAD_LOCAL __declspec(thread)

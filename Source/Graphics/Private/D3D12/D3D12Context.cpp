@@ -34,7 +34,7 @@ static PFN_DXGIGetDebugInterface1 g_DXGIGetDebugInterface1;
 
 void LoadD3D12API()
 {
-	LOG_TRACE("Loading d3d12.dll");
+	LOG_TRACE("Loading d3d12.dll.");
 	g_pD3D12Module = Module_Load("d3d12.dll");
 	Assert(g_pD3D12Module != nullptr);
 	g_D3D12CreateDevice = (PFN_D3D12CreateDevice)Module_GetFunctionAddress(g_pD3D12Module, "D3D12CreateDevice");
@@ -46,7 +46,7 @@ void LoadD3D12API()
 	Assert(g_D3D12EnableExperimentalFeatures != nullptr);
 	Assert(g_D3D12SerializeVersionedRootSignature != nullptr);
 
-	LOG_TRACE("Loading dxgi.dll");
+	LOG_TRACE("Loading dxgi.dll.");
 	g_pDXGIModule = Module_Load("dxgi.dll");
 	g_CreateDXGIFactory2 = (PFN_CreateDXGIFactory2)Module_GetFunctionAddress(g_pDXGIModule, "CreateDXGIFactory2");
 	g_DXGIGetDebugInterface1 = (PFN_DXGIGetDebugInterface1)Module_GetFunctionAddress(g_pDXGIModule, "DXGIGetDebugInterface1");
@@ -55,7 +55,7 @@ void LoadD3D12API()
 
 void UnloadD3D12API()
 {
-	LOG_TRACE("Unloading d3d12.dll");
+	LOG_TRACE("Unloading d3d12.dll.");
 	Module_Unload(g_pD3D12Module);
 	g_pD3D12Module = nullptr;
 	g_D3D12CreateDevice = nullptr;
@@ -63,7 +63,7 @@ void UnloadD3D12API()
 	g_D3D12EnableExperimentalFeatures = nullptr;
 	g_D3D12SerializeVersionedRootSignature = nullptr;
 
-	LOG_TRACE("Unloading dxgi.dll");
+	LOG_TRACE("Unloading dxgi.dll.");
 	Module_Unload(g_pDXGIModule);
 	g_pDXGIModule = nullptr;
 	g_CreateDXGIFactory2 = nullptr;
@@ -72,7 +72,7 @@ void UnloadD3D12API()
 
 #endif
 
-void Graphics_EnumAdapters(GraphicsContext* pContext, uint32* pAdapterCount, D3D12AdapterInfo* pAdaptersInfo)
+void Graphics_EnumAdapters(GraphicsContext* pContext, uint32* pAdapterCount, AdapterInfo* pAdaptersInfo)
 {
 	constexpr D3D_FEATURE_LEVEL FeatureLevelsRange[] =
 	{
@@ -140,12 +140,12 @@ void Graphics_EnumAdapters(GraphicsContext* pContext, uint32* pAdapterCount, D3D
 
 void Graphics_InitDevice(GraphicsContext* pContext)
 {
-	LOG_TRACE("Collect d3d12 adapter info");
+	LOG_TRACE("Collect d3d12 adapter info.");
 	uint32 adapterCount = 0;
 	Graphics_EnumAdapters(pContext, &adapterCount, nullptr);
 	Assert(adapterCount > 0);
 
-	hg::Vector<D3D12AdapterInfo> adaptersInfo(adapterCount);
+	hg::Vector<AdapterInfo> adaptersInfo(adapterCount);
 	Graphics_EnumAdapters(pContext, &adapterCount, adaptersInfo.data());
 
 	uint32 currentAdapterIndex = 0;
@@ -168,7 +168,7 @@ void Graphics_InitDevice(GraphicsContext* pContext)
 		++currentAdapterIndex;
 	}
 
-	LOG_TRACE("Init d3d12 device");
+	LOG_TRACE("Init d3d12 device.");
 	const auto& selectAdapterInfo = adaptersInfo[selectAdapterIndex];
 	D3D12_VERIFY(Graphics_D3D12CreateDevice(selectAdapterInfo.Adapter, selectAdapterInfo.MaxFeatureLevel, IID_PPV_ARGS(&pContext->Device)));
 
@@ -205,7 +205,7 @@ void Graphics_InitDevice(GraphicsContext* pContext)
 	}
 #endif
 
-	LOG_TRACE("Init d3d12 resource allocator");
+	LOG_TRACE("Init d3d12 resource allocator.");
 	D3D12MA::ALLOCATOR_DESC desc = {};
 	desc.Flags = D3D12MA::ALLOCATOR_FLAG_NONE;
 	desc.pDevice = pContext->Device;
@@ -221,7 +221,7 @@ bool Graphics_Init(const GraphicsContextCreateInfo& createInfo, GraphicsContext*
 
 	uint32 factoryFlags = 0;
 #if defined(HG_GFX_ENABLE_DEBUG)
-	LOG_TRACE("Init d3d12 debug layer");
+	LOG_TRACE("Init d3d12 debug layer.");
 	factoryFlags = DXGI_CREATE_FACTORY_DEBUG;
 	D3D12_VERIFY(Graphics_D3D12GetDebugInterface(IID_PPV_ARGS(&pContext->Debug)));
 	pContext->Debug->EnableDebugLayer();
@@ -232,16 +232,23 @@ bool Graphics_Init(const GraphicsContextCreateInfo& createInfo, GraphicsContext*
 	pDebug1->SetEnableSynchronizedCommandQueueValidation(createInfo.Debug.EnableSynchronizedCommandQueueValidation);
 #endif
 
-	LOG_TRACE("Init dxgi factory");
+	LOG_TRACE("Init dxgi factory.");
 	D3D12_VERIFY(Graphics_CreateDXGIFactory2(factoryFlags, IID_PPV_ARGS(&pContext->Factory)));
 
 	Graphics_InitDevice(pContext);
 
-	if (createInfo.StablePowerMode)
+	if (createInfo.EnableStablePowerMode)
 	{
-		LOG_TRACE("Enable d3d12 stable power mode");
 		D3D12_VERIFY(Graphics_D3D12EnableExperimentalFeatures(0, nullptr, nullptr, nullptr));
-		D3D12_VERIFY(pContext->Device->SetStablePowerState(TRUE));
+		// In Windows, you need to open Developer mode at first.
+		if (D3D12_FAILED(pContext->Device->SetStablePowerState(TRUE)))
+		{
+			LOG_ERROR("Failed to enable d3d12 stable power mode. Check if you are in Windows Developer mode.");
+		}
+		else
+		{
+			LOG_TRACE("Succeed to enable d3d12 stable power mode.");
+		}
 	}
 
 	return true;
@@ -249,36 +256,22 @@ bool Graphics_Init(const GraphicsContextCreateInfo& createInfo, GraphicsContext*
 
 void Graphics_Shutdown(GraphicsContext* pContext)
 {
-	LOG_TRACE("Shutdown d3d12 device");
-	if (pContext->Device)
-	{
-		pContext->Device->Release();
-		pContext->Device = nullptr;
-	}
-
-	LOG_TRACE("Shutdown d3d12 factory");
-	if (pContext->Factory)
-	{
-		pContext->Factory->Release();
-		pContext->Factory = nullptr;
-	}
+	LOG_TRACE("Shutdown d3d12 device.");
+	hg::SafeRelease(pContext->Device);
+	LOG_TRACE("Shutdown d3d12 factory.");
+	hg::SafeRelease(pContext->Factory);
 
 #if defined(HG_GFX_ENABLE_DEBUG)
-	LOG_TRACE("Shutdown d3d12 debug layer");
-	if (pContext->Debug)
-	{
-		pContext->Debug->Release();
-		pContext->Debug = nullptr;
-	}
+	LOG_TRACE("Shutdown d3d12 debug layer.");
+	hg::SafeRelease(pContext->Debug);
 	
 	if (pContext->InfoQueue)
 	{
 		pContext->InfoQueue->UnregisterMessageCallback(pContext->CallbackCookie);
-		pContext->InfoQueue->Release();
-		pContext->InfoQueue = nullptr;
 	}
+	hg::SafeRelease(pContext->InfoQueue);
 
-	LOG_TRACE("Report d3d12 live objects");
+	LOG_TRACE("Report d3d12 live objects.");
 	hg::RefCountPtr<IDXGIDebug1> pDebug1;
 	D3D12_VERIFY(Graphics_DXGIGetDebugInterface1(0, IID_PPV_ARGS(&pDebug1)));
 	pDebug1->ReportLiveObjects(IID_DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_DETAIL | DXGI_DEBUG_RLO_SUMMARY | DXGI_DEBUG_RLO_IGNORE_INTERNAL));

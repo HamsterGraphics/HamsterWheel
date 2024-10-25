@@ -20,7 +20,7 @@ HRESULT WINAPI Graphics_DXGIGetDebugInterface1(UINT Flags, REFIID riid, _COM_Out
 static const GUID IID_DXGI_DEBUG_ALL = { 0xe48ae283, 0xda80, 0x490b, { 0x87, 0xe6, 0x43, 0xe9, 0xa9, 0xcf, 0xda, 0x89 } };
 #endif
 
-typedef struct D3D12AdapterInfo
+typedef struct AdapterInfo
 {
 	hg::RefCountPtr<IDXGIAdapter4> Adapter;
 	D3D_FEATURE_LEVEL MaxFeatureLevel;
@@ -31,3 +31,10 @@ typedef struct D3D12AdapterInfo
 	uint64 DedicatedVRAM;
 	char Name[MAX_GPU_NAME_LENGTH];
 } D3D12GPUInfo;
+
+typedef struct DescriptorHeap
+{
+	ID3D12DescriptorHeap* Heap;
+	D3D12_CPU_DESCRIPTOR_HANDLE CPUStart;
+	D3D12_GPU_DESCRIPTOR_HANDLE GPUStart;
+} DescriptorHeap;

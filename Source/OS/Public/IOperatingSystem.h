@@ -122,7 +122,8 @@ typedef enum LogLevel
 	LOG_LEVEL_FATAL
 } LogLevel;
 
-C_ABI HG_OS_API void HG_CALLDECL Log_Init(ConsoleInfo* pInfo);
+C_ABI HG_OS_API bool HG_CALLDECL Log_Init(ConsoleInfo* pInfo);
+C_ABI HG_OS_API void HG_CALLDECL Log_Shutdown();
 C_ABI HG_OS_API void HG_CALLDECL Log_PrintFormat(LogLevel level, const char* format, ...);
 
 #if 1
@@ -172,3 +173,45 @@ C_ABI HG_OS_API void HG_CALLDECL Thread_Sleep(uint32 seconds);
 C_ABI HG_OS_API bool HG_CALLDECL Thread_Create(ThreadInfo* pInfo);
 C_ABI HG_OS_API void HG_CALLDECL Thread_Join(ThreadInfo* pInfo);
 C_ABI HG_OS_API void HG_CALLDECL Thread_Detach(ThreadInfo* pInfo);
+
+///////////////////////////////////////////////////////////////////////////////////
+// Mutex
+///////////////////////////////////////////////////////////////////////////////////
+typedef struct Mutex
+{
+#if defined(HG_PLATFORM_WINDOWS)
+	CRITICAL_SECTION Handle;
+#else
+	pthread_mutex_t Handle;
+	uint32 SpinCount;
+#endif
+} Mutex;
+
+C_ABI HG_OS_API bool HG_CALLDECL Mutex_Create(Mutex* pMutex);
+C_ABI HG_OS_API void HG_CALLDECL Mutex_Destroy(Mutex* pMutex);
+C_ABI HG_OS_API void HG_CALLDECL Mutex_Acquire(Mutex* pMutex);
+C_ABI HG_OS_API void HG_CALLDECL Mutex_Release(Mutex* pMutex);
+
+#if defined(__cplusplus)
+
+class ScopedMutexLock
+{
+public:
+	explicit ScopedMutexLock(Mutex& mutex) : m_mutex(mutex)
+	{
+		Mutex_Acquire(&m_mutex);
+	}
+
+	ScopedMutexLock(const ScopedMutexLock&) = delete;
+	ScopedMutexLock& operator=(const ScopedMutexLock&) = delete;
+
+	~ScopedMutexLock() noexcept
+	{
+		Mutex_Release(&m_mutex);
+	}
+
+private:
+	Mutex& m_mutex;
+};
+
+#endif
