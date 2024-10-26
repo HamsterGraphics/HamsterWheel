@@ -92,10 +92,13 @@ void Log_PrintFormat(LogLevel level, const char* format, ...)
 
 	va_list args;
 	va_start(args, format);
-	int length = vsnprintf(g_messageBuffer + logStyle.PrefixLength - 1, COUNTOF(g_messageBuffer) - logStyle.PrefixLength, format, args);
+	int32 length = vsnprintf(g_messageBuffer + logStyle.PrefixLength - 1, COUNTOF(g_messageBuffer) - logStyle.PrefixLength, format, args);
+	int32 endOfLine = logStyle.PrefixLength + length;
+	g_messageBuffer[endOfLine - 1] = '\n';
+	g_messageBuffer[endOfLine] = '\0';
 	va_end(args);
 
-	printf("%s\n", g_messageBuffer);
+	printf("%s", g_messageBuffer);
 #ifdef _DEBUG
 	::OutputDebugStringA(g_messageBuffer);
 #endif

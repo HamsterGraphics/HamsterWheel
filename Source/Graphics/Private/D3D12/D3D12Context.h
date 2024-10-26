@@ -20,6 +20,40 @@ HRESULT WINAPI Graphics_DXGIGetDebugInterface1(UINT Flags, REFIID riid, _COM_Out
 static const GUID IID_DXGI_DEBUG_ALL = { 0xe48ae283, 0xda80, 0x490b, { 0x87, 0xe6, 0x43, 0xe9, 0xa9, 0xcf, 0xda, 0x89 } };
 #endif
 
+template<typename T>
+inline HRESULT D3D12Cast(IUnknown* pSource, T** pTarget)
+{
+	return pSource->QueryInterface(__uuidof(T), reinterpret_cast<void**>(pTarget));
+}
+
+#define D3D12_SUCCEED(result) (HRESULT)result >= 0
+#define D3D12_FAILED(result) (HRESULT)result < 0
+
+inline std::string GetErrorString(HRESULT errorCode, ID3D12Device* pDevice)
+{
+	std::string str;
+	char* errorMsg;
+	if (::FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+		nullptr, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		(LPSTR)&errorMsg, 0, nullptr) != 0)
+	{
+		str += errorMsg;
+		LocalFree(errorMsg);
+	}
+
+	return str;
+}
+
+inline void LogHRESULT(HRESULT result, ID3D12Device* pDevice, const char* pCode, const char* pFileName, uint32 lineNumber)
+{
+	if (D3D12_FAILED(result))
+	{
+		LOG_FATAL("%s:%d: %s - %s", pFileName, lineNumber, GetErrorString(result, pDevice).c_str(), pCode);
+	}
+}
+
+#define D3D12_VERIFY(result) LogHRESULT(result, nullptr, #result, __FILE__, __LINE__)
+
 ///////////////////////////////////////////////////////
 // Adapter
 ///////////////////////////////////////////////////////
