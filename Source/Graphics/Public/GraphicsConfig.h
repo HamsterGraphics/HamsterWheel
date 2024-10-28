@@ -52,6 +52,7 @@ class Allocator;
 }
 
 struct DescriptorHeap;
+struct NullResources;
 
 #endif
 
@@ -76,10 +77,10 @@ typedef struct GraphicsContext
 	hg::RefCountPtr<IDXGIFactory6> Factory;
 	hg::RefCountPtr<ID3D12Device> Device;
 	D3D12MA::Allocator* ResourceAllocator;
-	DescriptorHeap** CPUDescriptorHeaps;
-	DescriptorHeap** GPUDescriptorHeaps;
-	uint32 CPUDescriptorHeapCount;
-	uint32 GPUDescriptorHeapCount;
+	DescriptorHeap* CPUDescriptorHeaps[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];
+	DescriptorHeap* GPUViewDescriptorHeap;
+	DescriptorHeap* GPUSamplerDescriptorHeap;
+	NullResources* NullResources;
 #if defined(HG_GFX_ENABLE_DEBUG)
 	hg::RefCountPtr<ID3D12Debug> Debug;
 	hg::RefCountPtr<ID3D12InfoQueue1> InfoQueue;

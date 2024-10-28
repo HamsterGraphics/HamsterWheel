@@ -7,7 +7,10 @@
 
 #pragma once
 
+#include "Base/NameOf.h"
+#include "Containers/Vector.h"
 #include "GraphicsConfig.h"
+#include "IGraphics.h"
 
 HRESULT WINAPI Graphics_D3D12CreateDevice(_In_opt_ void* pAdapter, D3D_FEATURE_LEVEL MinimumFeatureLevel, _In_ REFIID riid, _COM_Outptr_opt_ void** ppDevice);
 HRESULT WINAPI Graphics_D3D12GetDebugInterface(_In_ REFIID riid, _COM_Outptr_opt_ void** ppvDebug);
@@ -75,12 +78,24 @@ typedef struct AdapterInfo
 typedef struct DescriptorHeap
 {
 	ID3D12DescriptorHeap* Heap;
-	ID3D12Device* Device;
 	D3D12_CPU_DESCRIPTOR_HANDLE CPUStart;
 	D3D12_GPU_DESCRIPTOR_HANDLE GPUStart;
 	D3D12_DESCRIPTOR_HEAP_TYPE HeapType;
 	uint32 IncrementSize;
+	uint32 DescriptorsCount;
+	hg::Vector<uint32> DeadList;
 	Mutex HeapMutex;
 } DescriptorHeap;
 
-void DescriptorHeap_Init(DescriptorHeap* pDescriptorHeap, ID3D12Device* pDevice, const D3D12_DESCRIPTOR_HEAP_DESC& desc);
+///////////////////////////////////////////////////////
+// NullResources
+///////////////////////////////////////////////////////
+typedef struct NullResources
+{
+	uint32 TextureSRV2D;
+	uint32 TextureUAV2D;
+	uint32 BufferSRV;
+	uint32 BufferUAV;
+	uint32 BufferCBV;
+	uint32 Sampler;
+} NullResources;

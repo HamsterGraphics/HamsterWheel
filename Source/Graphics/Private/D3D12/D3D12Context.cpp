@@ -213,16 +213,80 @@ void Graphics_InitDevice(GraphicsContext* pContext)
 	D3D12_VERIFY(D3D12MA::CreateAllocator(&desc, &pContext->ResourceAllocator));
 }
 
+void DescriptorHeap_Init(DescriptorHeap* pDescriptorHeap, ID3D12Device* pDevice, const D3D12_DESCRIPTOR_HEAP_DESC& desc)
+{
+	pDescriptorHeap->HeapType = desc.Type;
+	pDescriptorHeap->DescriptorsCount = desc.NumDescriptors;
+	pDescriptorHeap->DeadList.resize(desc.NumDescriptors);
+	pDescriptorHeap->IncrementSize = pDevice->GetDescriptorHandleIncrementSize(desc.Type);
+	D3D12_VERIFY(pDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&pDescriptorHeap->Heap)));
+	pDescriptorHeap->CPUStart = pDescriptorHeap->Heap->GetCPUDescriptorHandleForHeapStart();
+	if (const bool isShaderVisible = desc.Flags & D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE)
+	{
+		pDescriptorHeap->GPUStart = pDescriptorHeap->Heap->GetGPUDescriptorHandleForHeapStart();
+	}
+}
+
 void Graphics_InitDescriptorHeaps(GraphicsContext* pContext)
 {
-	pContext->CPUDescriptorHeapCount = D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES;
-	pContext->CPUDescriptorHeaps;
+	constexpr uint32 CPUDescriptorConfig[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES] = {
+		8196, // CBV_SRV_UAV
+		2048, // SAMPLER
+		512,  // RTV
+		512   // DSV
+	};
 
-	// D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV + D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER
-	pContext->GPUDescriptorHeapCount = 2;
-	pContext->GPUDescriptorHeaps;
+	for (uint32 ii = 0; ii < D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES; ++ii)
+	{
+		pContext->CPUDescriptorHeaps[ii] = new DescriptorHeap;
+		D3D12_DESCRIPTOR_HEAP_DESC desc = {};
+		desc.NodeMask = 0;
+		desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+		desc.Type = static_cast<D3D12_DESCRIPTOR_HEAP_TYPE>(ii);
+		desc.NumDescriptors = CPUDescriptorConfig[ii];
+		DescriptorHeap_Init(pContext->CPUDescriptorHeaps[ii], pContext->Device, desc);
+	}
 
-	// DescriptorHeap_Init;
+	{
+		pContext->GPUViewDescriptorHeap = new DescriptorHeap;
+		D3D12_DESCRIPTOR_HEAP_DESC desc = {};
+		desc.NodeMask = 0;
+		desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+		desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+		desc.NumDescriptors = 8196 * 2;
+		DescriptorHeap_Init(pContext->GPUViewDescriptorHeap, pContext->Device, desc);
+	}
+
+	{
+		pContext->GPUSamplerDescriptorHeap = new DescriptorHeap;
+		D3D12_DESCRIPTOR_HEAP_DESC desc = {};
+		desc.NodeMask = 0;
+		desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+		desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
+		desc.NumDescriptors = 2048;
+		DescriptorHeap_Init(pContext->GPUSamplerDescriptorHeap, pContext->Device, desc);
+	}
+}
+
+void Graphics_InitDefaultResources(GraphicsContext* pContext)
+{
+	auto* pNullResources = pContext->NullResources;
+	constexpr uint32 InvalidDescriptorID = -1;
+	pNullResources->TextureSRV2D = InvalidDescriptorID;
+	pNullResources->TextureSRV2D = InvalidDescriptorID;
+	pNullResources->BufferCBV = InvalidDescriptorID;
+	pNullResources->BufferSRV = InvalidDescriptorID;
+	pNullResources->BufferUAV = InvalidDescriptorID;
+	pNullResources->Sampler = InvalidDescriptorID;
+
+	auto* pCPUViewDescriptorHeap = pContext->CPUDescriptorHeaps[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV];
+	auto* pCPUViewHeap = pCPUViewDescriptorHeap->Heap;
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Format = DXGI_FORMAT_R8_UINT;
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE1D;
+	pContext->Device->CreateShaderResourceView(NULL, &srvDesc, pCPUViewDescriptorHeap->CPUStart);
 }
 
 bool Graphics_Init(const GraphicsContextCreateInfo& createInfo, GraphicsContext* pContext)
@@ -257,12 +321,23 @@ bool Graphics_Init(const GraphicsContextCreateInfo& createInfo, GraphicsContext*
 	}
 
 	Graphics_InitDescriptorHeaps(pContext);
+	Graphics_InitDefaultResources(pContext);
 
 	return true;
 }
 
 void Graphics_Shutdown(GraphicsContext* pContext)
 {
+	for (uint32 ii = 0; ii < D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES; ++ii)
+	{
+		delete pContext->CPUDescriptorHeaps[ii];
+		pContext->CPUDescriptorHeaps[ii] = nullptr;
+	}
+	delete pContext->GPUViewDescriptorHeap;
+	pContext->GPUViewDescriptorHeap = nullptr;
+	delete pContext->GPUSamplerDescriptorHeap;
+	pContext->GPUSamplerDescriptorHeap = nullptr;
+
 #if defined(HG_GFX_ENABLE_DEBUG)
 	LOG_TRACE("Report d3d12 live objects.");
 	hg::RefCountPtr<ID3D12DebugDevice> pDebugDevice;
