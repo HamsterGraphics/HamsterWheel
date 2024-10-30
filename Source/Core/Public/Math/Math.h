@@ -9,6 +9,8 @@
 
 #include "../Base/BasicTypes.h"
 
+#include <numeric>
+
 typedef struct Rect
 {
 	int32 X;

@@ -30,30 +30,9 @@
 #define MAX_GPU_NAME_LENGTH 128
 
 #if defined(HG_GFX_BACKEND_D3D12)
-///////////////////////////////////////////////////////
-// D3D12
-///////////////////////////////////////////////////////
-#include <d3d12.h>
-#include <dxgi1_6.h>
-
-#if defined(HG_GFX_ENABLE_DEBUG)
-#include <dxgidebug.h>
-typedef struct GraphicsDebugContextCreateInfo
-{
-	bool EnableGPUBasedValidation;
-	bool EnableSynchronizedCommandQueueValidation;
-} GraphicsDebugContextCreateInfo;
-#endif
-
-// Forward Declaration
-namespace D3D12MA
-{
-class Allocator;
-}
-
-struct DescriptorHeap;
-struct NullResources;
-
+#include "D3D12Config.h"
+#elif defined(HG_GFX_BACKEND_METAL)
+#include "MetalConfig.h"
 #endif
 
 ///////////////////////////////////////////////////////
@@ -77,9 +56,9 @@ typedef struct GraphicsContext
 	hg::RefCountPtr<IDXGIFactory6> Factory;
 	hg::RefCountPtr<ID3D12Device> Device;
 	D3D12MA::Allocator* ResourceAllocator;
-	DescriptorHeap* CPUDescriptorHeaps[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];
-	DescriptorHeap* GPUViewDescriptorHeap;
-	DescriptorHeap* GPUSamplerDescriptorHeap;
+	hg::CPUDescriptorHeap* CPUDescriptorHeaps[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];
+	hg::GPUDescriptorHeap* GPUViewDescriptorHeap;
+	hg::GPUDescriptorHeap* GPUSamplerDescriptorHeap;
 	NullResources* NullResources;
 #if defined(HG_GFX_ENABLE_DEBUG)
 	hg::RefCountPtr<ID3D12Debug> Debug;

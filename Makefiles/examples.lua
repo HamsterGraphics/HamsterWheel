@@ -25,6 +25,7 @@ local function MakeExample(exampleFolder)
 			path.join(SourcePath, "Core/Public"),
 			path.join(SourcePath, "OS/Public"),
 			path.join(SourcePath, "Graphics/Public"),
+			path.join(SourcePath, "Graphics/Public/"..GfxBackendName),
 			path.join(SourcePath, "Application/Public"),
 		}
 
