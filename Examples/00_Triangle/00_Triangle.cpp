@@ -25,9 +25,9 @@ public:
 		LOG_TRACE("Init graphics module.");
 		m_graphicsContext = std::make_unique<GraphicsContext>();
 		GraphicsContextCreateInfo contextCreateInfo = {};
-		contextCreateInfo.EnableStablePowerMode = true;
+		contextCreateInfo.EnableStablePowerMode = false;
 		contextCreateInfo.Debug.EnableGPUBasedValidation = true;
-		contextCreateInfo.Debug.EnableSynchronizedCommandQueueValidation = false;
+		contextCreateInfo.Debug.EnableSynchronizedCommandQueueValidation = true;
 		Graphics_Init(contextCreateInfo, m_graphicsContext.get());
 
 		return true;
@@ -44,6 +44,8 @@ public:
 
 	virtual void Render() override
 	{
+		Graphics_BeginFrame(m_graphicsContext.get());
+		Graphics_EndFrame(m_graphicsContext.get());
 	}
 
 	virtual const char* GetName() const override

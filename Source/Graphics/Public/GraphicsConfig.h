@@ -28,59 +28,12 @@
 
 #define MAX_GPU_COUNT 4
 #define MAX_GPU_NAME_LENGTH 128
+#define MAX_FRAME_COUNT 2
 
 #if defined(HG_GFX_BACKEND_D3D12)
-///////////////////////////////////////////////////////
-// D3D12
-///////////////////////////////////////////////////////
-#include <d3d12.h>
-#include <dxgi1_6.h>
-
-#if defined(HG_GFX_ENABLE_DEBUG)
-#include <dxgidebug.h>
-typedef struct GraphicsDebugContextCreateInfo
-{
-	bool EnableGPUBasedValidation;
-	bool EnableSynchronizedCommandQueueValidation;
-} GraphicsDebugContextCreateInfo;
-#endif
-
-#define D3D12_SUCCEED(result) (HRESULT)result >= 0
-#define D3D12_FAILED(result) (HRESULT)result < 0
-
-inline std::string GetErrorString(HRESULT errorCode, ID3D12Device* pDevice)
-{
-	std::string str;
-	char* errorMsg;
-	if (::FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-		nullptr, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(LPSTR)&errorMsg, 0, nullptr) != 0)
-	{
-		str += errorMsg;
-		LocalFree(errorMsg);
-	}
-
-	return str;
-}
-
-inline void LogHRESULT(HRESULT result, ID3D12Device* pDevice, const char* pCode, const char* pFileName, uint32 lineNumber)
-{
-	if (D3D12_FAILED(result))
-	{
-		LOG_FATAL("%s:%d: %s - %s", pFileName, lineNumber, GetErrorString(result, pDevice).c_str(), pCode);
-	}
-}
-
-#define D3D12_VERIFY(result) LogHRESULT(result, nullptr, #result, __FILE__, __LINE__)
-
-// Forward Declaration
-namespace D3D12MA
-{
-class Allocator;
-}
-
-struct DescriptorHeap;
-
+#include "D3D12Config.h"
+#elif defined(HG_GFX_BACKEND_METAL)
+#include "MetalConfig.h"
 #endif
 
 ///////////////////////////////////////////////////////
@@ -101,17 +54,26 @@ typedef struct GraphicsContextCreateInfo
 typedef struct GraphicsContext
 {
 #if defined(HG_GFX_BACKEND_D3D12)
-	IDXGIFactory6* Factory;
-	ID3D12Device* Device;
-	D3D12MA::Allocator* ResourceAllocator;
-	DescriptorHeap** CPUDescriptorHeaps;
-	DescriptorHeap** GPUDescriptorHeaps;
-	uint32 CPUDescriptorHeapCount;
-	uint32 GPUDescriptorHeapCount;
+	hg::RefCountPtr<IDXGIFactory6> Factory;
+	hg::RefCountPtr<ID3D12Device> Device;
+	
+	// Debug
 #if defined(HG_GFX_ENABLE_DEBUG)
-	ID3D12Debug* Debug;
-	ID3D12InfoQueue1* InfoQueue;
+	hg::RefCountPtr<ID3D12Debug> Debug;
+	hg::RefCountPtr<ID3D12InfoQueue1> InfoQueue;
 	DWORD CallbackCookie;
 #endif
+
+	// Resource
+	D3D12MA::Allocator* ResourceAllocator;
+	NullResources* NullResources;
+
+	// Descriptor
+	hg::CPUDescriptorHeap* CPUDescriptorHeaps[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];
+	hg::GPUDescriptorHeap* GPUViewDescriptorHeap;
+	hg::GPUDescriptorHeap* GPUSamplerDescriptorHeap;
+	
+	// Command
+	hg::RefCountPtr<ID3D12CommandAllocator> CommandAllocator;
 #endif
 } GraphicsContext;

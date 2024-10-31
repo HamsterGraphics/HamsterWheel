@@ -9,6 +9,8 @@
 
 #include "Base/NameOf.h"
 #include "Containers/Vector.h"
+#include "CPUDescriptorHeap.h"
+#include "GPUDescriptorHeap.h"
 #include "IGraphics.h"
 
 #include "D3D12MemoryAllocator/D3D12MemAlloc.h"
@@ -72,6 +74,9 @@ void UnloadD3D12API()
 
 #endif
 
+///////////////////////////////////////////////////////
+// Adapter
+///////////////////////////////////////////////////////
 void Graphics_EnumAdapters(GraphicsContext* pContext, uint32* pAdapterCount, AdapterInfo* pAdaptersInfo)
 {
 	constexpr D3D_FEATURE_LEVEL FeatureLevelsRange[] =
@@ -138,6 +143,9 @@ void Graphics_EnumAdapters(GraphicsContext* pContext, uint32* pAdapterCount, Ada
 	*pAdapterCount = availableAdpaterCount;
 }
 
+///////////////////////////////////////////////////////
+// Device
+///////////////////////////////////////////////////////
 void Graphics_InitDevice(GraphicsContext* pContext)
 {
 	LOG_TRACE("Collect d3d12 adapter info.");
@@ -174,7 +182,7 @@ void Graphics_InitDevice(GraphicsContext* pContext)
 
 #if defined(HG_GFX_ENABLE_DEBUG)
 	hg::RefCountPtr<ID3D12InfoQueue1> pInfoQueue;
-	if (D3D12_SUCCEED(pContext->Device->QueryInterface(IID_PPV_ARGS(&pContext->InfoQueue))))
+	if (D3D12_SUCCEED(D3D12Cast(pContext->Device, &pContext->InfoQueue)))
 	{
 		D3D12_VERIFY(pContext->InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, TRUE));
 		D3D12_VERIFY(pContext->InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, TRUE));
@@ -213,18 +221,57 @@ void Graphics_InitDevice(GraphicsContext* pContext)
 	D3D12_VERIFY(D3D12MA::CreateAllocator(&desc, &pContext->ResourceAllocator));
 }
 
+///////////////////////////////////////////////////////
+// Descriptors
+///////////////////////////////////////////////////////
 void Graphics_InitDescriptorHeaps(GraphicsContext* pContext)
 {
-	pContext->CPUDescriptorHeapCount = D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES;
-	pContext->CPUDescriptorHeaps;
+	constexpr uint32 CPUDescriptorConfig[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES] = {
+		8192, // CBV_SRV_UAV
+		2048, // SAMPLER
+		512,  // RTV
+		512   // DSV
+	};
 
-	// D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV + D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER
-	pContext->GPUDescriptorHeapCount = 2;
-	pContext->GPUDescriptorHeaps;
+	LOG_TRACE("Init CPU descriptor heap.");
+	for (uint32 ii = 0; ii < D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES; ++ii)
+	{
+		D3D12_DESCRIPTOR_HEAP_TYPE heapType = static_cast<D3D12_DESCRIPTOR_HEAP_TYPE>(ii);
+		uint32 descriptorCount = CPUDescriptorConfig[ii];
+		pContext->CPUDescriptorHeaps[ii] = new hg::CPUDescriptorHeap(pContext->Device, heapType, descriptorCount);
+		LOG_TRACE("  Type = %s, DescriptorCount = %u", hg::EnumName(pContext->CPUDescriptorHeaps[ii]->GetHeapType()).data(), pContext->CPUDescriptorHeaps[ii]->GetDescriptorCount());
+	}
 
-	// DescriptorHeap_Init;
+	LOG_TRACE("Init GPU descriptor heap.");
+	pContext->GPUViewDescriptorHeap = new hg::GPUDescriptorHeap(pContext->Device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 8192, 8192);
+	LOG_TRACE("  Type = %s, DescriptorCount = %u", hg::EnumName(pContext->GPUViewDescriptorHeap->GetHeapType()).data(), pContext->GPUViewDescriptorHeap->GetDescriptorCount());
+	pContext->GPUSamplerDescriptorHeap = new hg::GPUDescriptorHeap(pContext->Device, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, 2048, 0);
+	LOG_TRACE("  Type = %s, DescriptorCount = %u", hg::EnumName(pContext->GPUSamplerDescriptorHeap->GetHeapType()).data(), pContext->GPUSamplerDescriptorHeap->GetDescriptorCount());
 }
 
+void Graphics_DestroyDescriptorHeaps(GraphicsContext* pContext)
+{
+	for (uint32 ii = 0; ii < D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES; ++ii)
+	{
+		delete pContext->CPUDescriptorHeaps[ii];
+		pContext->CPUDescriptorHeaps[ii] = nullptr;
+	}
+	delete pContext->GPUViewDescriptorHeap;
+	pContext->GPUViewDescriptorHeap = nullptr;
+	delete pContext->GPUSamplerDescriptorHeap;
+	pContext->GPUSamplerDescriptorHeap = nullptr;
+}
+
+///////////////////////////////////////////////////////
+// Resource
+///////////////////////////////////////////////////////
+void Graphics_InitDefaultResources(GraphicsContext* pContext)
+{
+}
+
+///////////////////////////////////////////////////////
+// Entry point
+///////////////////////////////////////////////////////
 bool Graphics_Init(const GraphicsContextCreateInfo& createInfo, GraphicsContext* pContext)
 {
 #if defined(HG_GFX_DYNAMIC_API)
@@ -239,7 +286,7 @@ bool Graphics_Init(const GraphicsContextCreateInfo& createInfo, GraphicsContext*
 	pContext->Debug->EnableDebugLayer();
 
 	hg::RefCountPtr<ID3D12Debug1> pDebug1;
-	D3D12_VERIFY(pContext->Debug->QueryInterface(IID_PPV_ARGS(&pDebug1)));
+	D3D12_VERIFY(D3D12Cast(pContext->Debug, &pDebug1));
 	pDebug1->SetEnableGPUBasedValidation(createInfo.Debug.EnableGPUBasedValidation);
 	pDebug1->SetEnableSynchronizedCommandQueueValidation(createInfo.Debug.EnableSynchronizedCommandQueueValidation);
 #endif
@@ -253,42 +300,31 @@ bool Graphics_Init(const GraphicsContextCreateInfo& createInfo, GraphicsContext*
 	{
 		D3D12_VERIFY(Graphics_D3D12EnableExperimentalFeatures(0, nullptr, nullptr, nullptr));
 		// In Windows, you need to open Developer mode at first.
-		if (D3D12_FAILED(pContext->Device->SetStablePowerState(TRUE)))
-		{
-			LOG_ERROR("Failed to enable d3d12 stable power mode. Check if you are in Windows Developer mode.");
-		}
-		else
-		{
-			LOG_TRACE("Succeed to enable d3d12 stable power mode.");
-		}
+		D3D12_VERIFY(pContext->Device->SetStablePowerState(TRUE));
 	}
 
 	Graphics_InitDescriptorHeaps(pContext);
+	Graphics_InitDefaultResources(pContext);
+	Graphics_InitCommandPool(pContext);
 
 	return true;
 }
 
 void Graphics_Shutdown(GraphicsContext* pContext)
 {
-	LOG_TRACE("Shutdown d3d12 device.");
-	hg::SafeRelease(pContext->Device);
-	LOG_TRACE("Shutdown d3d12 factory.");
-	hg::SafeRelease(pContext->Factory);
+	Graphics_DestroyDescriptorHeaps(pContext);
+	Graphics_DestroyCommandPool(pContext);
 
 #if defined(HG_GFX_ENABLE_DEBUG)
-	LOG_TRACE("Shutdown d3d12 debug layer.");
-	hg::SafeRelease(pContext->Debug);
-	
+	LOG_TRACE("Report d3d12 live objects.");
+	hg::RefCountPtr<ID3D12DebugDevice> pDebugDevice;
+	D3D12_VERIFY(D3D12Cast<ID3D12DebugDevice>(pContext->Device, &pDebugDevice));
+	pDebugDevice->ReportLiveDeviceObjects((D3D12_RLDO_FLAGS)(D3D12_RLDO_DETAIL));
+
 	if (pContext->InfoQueue)
 	{
 		pContext->InfoQueue->UnregisterMessageCallback(pContext->CallbackCookie);
 	}
-	hg::SafeRelease(pContext->InfoQueue);
-
-	LOG_TRACE("Report d3d12 live objects.");
-	hg::RefCountPtr<IDXGIDebug1> pDebug1;
-	D3D12_VERIFY(Graphics_DXGIGetDebugInterface1(0, IID_PPV_ARGS(&pDebug1)));
-	pDebug1->ReportLiveObjects(IID_DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_DETAIL | DXGI_DEBUG_RLO_SUMMARY | DXGI_DEBUG_RLO_IGNORE_INTERNAL));
 #endif
 
 #if defined(HG_GFX_DYNAMIC_API)
@@ -296,6 +332,36 @@ void Graphics_Shutdown(GraphicsContext* pContext)
 #endif
 }
 
+void Graphics_BeginFrame(GraphicsContext* pContext)
+{
+}
+
+void Graphics_EndFrame(GraphicsContext* pContext)
+{
+	pContext->GPUViewDescriptorHeap->EndFrame();
+	pContext->GPUSamplerDescriptorHeap->EndFrame();
+}
+
+void Graphics_InitCommandQueue(GraphicsContext* pContext)
+{
+}
+
+void Graphics_DestroyCommandQueue(GraphicsContext* pContext)
+{
+}
+
+void Graphics_InitCommandPool(GraphicsContext* pContext)
+{
+	D3D12_VERIFY(pContext->Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&pContext->CommandAllocator)));
+}
+
+void Graphics_DestroyCommandPool(GraphicsContext* pContext)
+{
+}
+
+///////////////////////////////////////////////////////
+// API
+///////////////////////////////////////////////////////
 HRESULT Graphics_D3D12CreateDevice(_In_opt_ void* pAdapter, D3D_FEATURE_LEVEL MinimumFeatureLevel, _In_ REFIID riid, _COM_Outptr_opt_ void** ppDevice)
 {
 #if defined(HG_GFX_DYNAMIC_API)
