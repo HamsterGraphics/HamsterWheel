@@ -28,6 +28,7 @@
 
 #define MAX_GPU_COUNT 4
 #define MAX_GPU_NAME_LENGTH 128
+#define MAX_FRAME_COUNT 2
 
 #if defined(HG_GFX_BACKEND_D3D12)
 #include "D3D12Config.h"
@@ -55,15 +56,24 @@ typedef struct GraphicsContext
 #if defined(HG_GFX_BACKEND_D3D12)
 	hg::RefCountPtr<IDXGIFactory6> Factory;
 	hg::RefCountPtr<ID3D12Device> Device;
-	D3D12MA::Allocator* ResourceAllocator;
-	hg::CPUDescriptorHeap* CPUDescriptorHeaps[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];
-	hg::GPUDescriptorHeap* GPUViewDescriptorHeap;
-	hg::GPUDescriptorHeap* GPUSamplerDescriptorHeap;
-	NullResources* NullResources;
+	
+	// Debug
 #if defined(HG_GFX_ENABLE_DEBUG)
 	hg::RefCountPtr<ID3D12Debug> Debug;
 	hg::RefCountPtr<ID3D12InfoQueue1> InfoQueue;
 	DWORD CallbackCookie;
 #endif
+
+	// Resource
+	D3D12MA::Allocator* ResourceAllocator;
+	NullResources* NullResources;
+
+	// Descriptor
+	hg::CPUDescriptorHeap* CPUDescriptorHeaps[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];
+	hg::GPUDescriptorHeap* GPUViewDescriptorHeap;
+	hg::GPUDescriptorHeap* GPUSamplerDescriptorHeap;
+	
+	// Command
+	hg::RefCountPtr<ID3D12CommandAllocator> CommandAllocator;
 #endif
 } GraphicsContext;

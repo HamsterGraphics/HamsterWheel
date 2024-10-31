@@ -44,6 +44,8 @@ public:
 
 	virtual void Render() override
 	{
+		Graphics_BeginFrame(m_graphicsContext.get());
+		Graphics_EndFrame(m_graphicsContext.get());
 	}
 
 	virtual const char* GetName() const override
