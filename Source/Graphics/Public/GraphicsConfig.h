@@ -16,6 +16,7 @@
 #include "Containers/Vector.h"
 #include "IOperatingSystem.h"
 
+#include <cstdlib>
 #include <string>
 
 #if defined(HG_GFX_EXPORT)

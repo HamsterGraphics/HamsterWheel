@@ -12,6 +12,7 @@
 #include "Fence.h"
 #include "GPUDescriptorHeap.h"
 #include "SwapChain.h"
+#include "RenderTarget.h"
 #include "Texture.h"
 
 #include "IGraphics.h"
@@ -136,6 +137,9 @@ void Graphics_EnumAdapters(GraphicsContext* pContext, uint32* pAdapterCount, Ada
 			adapterInfo.DedicatedVRAM = adapterDesc.DedicatedVideoMemory;
 			adapterInfo.MaxFeatureLevel = featureLevelsData.MaxSupportedFeatureLevel;
 			adapterInfo.MaxShaderModel = shaderModelData.HighestShaderModel;
+
+			size_t numConverted = 0;
+			wcstombs_s(&numConverted, adapterInfo.Name, adapterDesc.Description, COUNTOF(adapterInfo.Name));
 		}
 		else
 		{
@@ -321,6 +325,13 @@ bool Graphics_Init(const GraphicsContextCreateInfo& createInfo, GraphicsContext*
 	desc.ClearValue = { 1.0f, 1.0f, 1.0f, 1.0f };
 	pContext->SwapChain = new hg::SwapChain(pContext->Factory, desc);
 
+	LOG_TRACE("Init swap chain back buffer RTVs.");
+	for (uint32 bufferIndex = 0; bufferIndex < desc.BufferCount; ++bufferIndex)
+	{
+		auto rtvHandle = pContext->CPUDescriptorHeaps[D3D12_DESCRIPTOR_HEAP_TYPE_RTV]->Allocate();
+		pContext->SwapChain->CreateBackBufferRTV(pContext->Device, bufferIndex, rtvHandle);
+	}
+
 	return true;
 }
 
@@ -356,14 +367,16 @@ void Graphics_BeginFrame(GraphicsContext* pContext)
 		pContext->GPUSamplerDescriptorHeap->GetHandle()
 	};
 	pContext->GraphicsCommandList->SetDescriptorHeaps(COUNTOF(heaps), heaps);
+
+	pContext->SwapChain->BeginFrame();
 }
 
 void Graphics_EndFrame(GraphicsContext* pContext)
 {
 	// Submit
-	D3D12_VERIFY(pContext->GraphicsCommandList->Close());
-	ID3D12CommandList* pCommandLists[] = { pContext->GraphicsCommandList };
-	pContext->GraphicsQueue->GetHandle()->ExecuteCommandLists(COUNTOF(pCommandLists), pCommandLists);
+	//D3D12_VERIFY(pContext->GraphicsCommandList->Close());
+	//ID3D12CommandList* pCommandLists[] = { pContext->GraphicsCommandList };
+	//pContext->GraphicsQueue->GetHandle()->ExecuteCommandLists(COUNTOF(pCommandLists), pCommandLists);
 
 	// Synchronization
 	++pContext->CurrentCPUFrame;
@@ -379,6 +392,8 @@ void Graphics_EndFrame(GraphicsContext* pContext)
 
 	pContext->GPUViewDescriptorHeap->EndFrame();
 	pContext->GPUSamplerDescriptorHeap->EndFrame();
+
+	pContext->SwapChain->EndFrame();
 }
 
 void Graphics_InitCommandContext(GraphicsContext* pContext)

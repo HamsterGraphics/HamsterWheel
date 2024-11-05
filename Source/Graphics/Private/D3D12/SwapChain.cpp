@@ -8,6 +8,7 @@
 #include "SwapChain.h"
 
 #include "CommandQueue.h"
+#include "RenderTarget.h"
 
 namespace hg
 {
@@ -40,8 +41,19 @@ SwapChain::SwapChain(IDXGIFactory6* pFactory, const SwapChainDesc& desc)
         &swapChainDesc, &fullScreenDesc, NULL, &pSwapChain1));
     D3D12_VERIFY(pFactory->MakeWindowAssociation((HWND)desc.NativeWindowHandle, DXGI_MWA_NO_ALT_ENTER));
     D3D12_VERIFY(D3D12Cast(pSwapChain1, &m_swapChain));
+}
 
+void SwapChain::BeginFrame()
+{
+    m_bufferIndex = m_swapChain->GetCurrentBackBufferIndex();
+}
 
+void SwapChain::EndFrame()
+{
+}
+
+void SwapChain::CreateBackBufferRTV(ID3D12Device* pDevice, uint32 index, D3D12_CPU_DESCRIPTOR_HANDLE rtv)
+{
 }
 
 }
