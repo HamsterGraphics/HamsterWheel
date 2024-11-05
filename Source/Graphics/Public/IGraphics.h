@@ -224,7 +224,5 @@ C_ABI HG_GFX_API void HG_CALLDECL Graphics_BeginFrame(GraphicsContext* pContext)
 C_ABI HG_GFX_API void HG_CALLDECL Graphics_EndFrame(GraphicsContext* pContext);
 void Graphics_InitDescriptorHeaps(GraphicsContext* pContext);
 void Graphics_DestroyDescriptorHeaps(GraphicsContext* pContext);
-void Graphics_InitCommandQueue(GraphicsContext* pContext);
-void Graphics_DestroyCommandQueue(GraphicsContext* pContext);
-void Graphics_InitCommandPool(GraphicsContext* pContext);
-void Graphics_DestroyCommandPool(GraphicsContext* pContext);
+void Graphics_InitCommandContext(GraphicsContext* pContext);
+void Graphics_DestroyCommandContext(GraphicsContext* pContext);

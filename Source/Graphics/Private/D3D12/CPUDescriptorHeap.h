@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include "Containers/Vector.h"
 #include "IGraphics.h"
 
 #include <atomic>

@@ -25,15 +25,6 @@ namespace D3D12MA
 class Allocator;
 }
 
-namespace hg
-{
-class CPUDescriptorHeap;
-class GPUDescriptorHeap;
-}
-
-struct DescriptorHeap;
-struct NullResources;
-
 #if defined(HG_GFX_ENABLE_DEBUG)
 static const GUID IID_DXGI_DEBUG_ALL = { 0xe48ae283, 0xda80, 0x490b, { 0x87, 0xe6, 0x43, 0xe9, 0xa9, 0xcf, 0xda, 0x89 } };
 #endif

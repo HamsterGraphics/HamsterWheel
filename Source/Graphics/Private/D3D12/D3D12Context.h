@@ -7,9 +7,6 @@
 
 #pragma once
 
-#include "Base/NameOf.h"
-#include "Containers/Vector.h"
-#include "GraphicsConfig.h"
 #include "IGraphics.h"
 
 HRESULT WINAPI Graphics_D3D12CreateDevice(_In_opt_ void* pAdapter, D3D_FEATURE_LEVEL MinimumFeatureLevel, _In_ REFIID riid, _COM_Outptr_opt_ void** ppDevice);

@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include "Containers/Vector.h"
 #include "IGraphics.h"
 
 namespace hg
@@ -30,6 +29,7 @@ public:
 	GPUDescriptorHeap& operator=(GPUDescriptorHeap&&) = delete;
 	~GPUDescriptorHeap() = default;
 
+	ID3D12DescriptorHeap* GetHandle() const { return m_heap[m_heapIndex]; }
 	D3D12_DESCRIPTOR_HEAP_TYPE GetHeapType() const { return m_type; }
 	uint32 GetDescriptorCount() const { return m_persistentDescriptorCount + m_tempDescriptorCount; }
 

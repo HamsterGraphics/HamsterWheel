@@ -6,6 +6,7 @@
  */
 
 #include "CommandQueue.h"
+#include "Fence.h"
 
 namespace hg
 {

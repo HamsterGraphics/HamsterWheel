@@ -7,12 +7,14 @@
 
 #pragma once
 
-#include "Fence.h"
+#include "IGraphics.h"
 
 #include <memory>
 
 namespace hg
 {
+
+class Fence;
 
 class CommandQueue
 {
@@ -24,6 +26,8 @@ public:
 	CommandQueue(CommandQueue&&) = delete;
 	CommandQueue& operator=(CommandQueue&&) = delete;
 	~CommandQueue() = default;
+
+	ID3D12CommandQueue* GetHandle() const { return m_queue; }
 
 private:
 	RefCountPtr<ID3D12CommandQueue> m_queue;

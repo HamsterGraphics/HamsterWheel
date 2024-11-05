@@ -310,7 +310,7 @@ int AppMain(int argc, char** argv, hg::IApplication* pApp)
 	}
 
 	// Init application
-	pApp->Init();
+	pApp->Init(windowInfo.Handle);
 
 	// Loop
 	LOG_TRACE("Start application loop.");
