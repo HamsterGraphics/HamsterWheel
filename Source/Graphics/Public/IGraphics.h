@@ -218,10 +218,10 @@ typedef struct GPUInfo
 ///////////////////////////////////////////////////////
 // Context
 ///////////////////////////////////////////////////////
-C_ABI HG_GFX_API bool HG_CALLDECL Graphics_Init(const GraphicsContextCreateInfo& createInfo, GraphicsContext* pContext);
-C_ABI HG_GFX_API void HG_CALLDECL Graphics_Shutdown(GraphicsContext* pContext);
-C_ABI HG_GFX_API void HG_CALLDECL Graphics_BeginFrame(GraphicsContext* pContext);
-C_ABI HG_GFX_API void HG_CALLDECL Graphics_EndFrame(GraphicsContext* pContext);
+C_ABI HG_GFX_API bool HG_CDECL Graphics_Init(const GraphicsContextCreateInfo& createInfo, GraphicsContext* pContext);
+C_ABI HG_GFX_API void HG_CDECL Graphics_Shutdown(GraphicsContext* pContext);
+C_ABI HG_GFX_API void HG_CDECL Graphics_BeginFrame(GraphicsContext* pContext);
+C_ABI HG_GFX_API void HG_CDECL Graphics_EndFrame(GraphicsContext* pContext);
 void Graphics_InitDescriptorHeaps(GraphicsContext* pContext);
 void Graphics_DestroyDescriptorHeaps(GraphicsContext* pContext);
 void Graphics_InitCommandContext(GraphicsContext* pContext);

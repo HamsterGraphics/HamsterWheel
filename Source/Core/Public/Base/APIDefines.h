@@ -26,7 +26,7 @@
 #define C_ABI
 #endif
 
-#define HG_CALLDECL __cdecl
+#define HG_CDECL __cdecl
 
 #if defined(HG_CORE_EXPORT)
 #define HG_CORE_API API_EXPORT

@@ -13,7 +13,7 @@
 #include "Base/NameOf.h"
 #include "Base/PlatformDefines.h"
 #include "Base/RefCountPtr.h"
-#include "Containers/Vector.h"
+#include "STL/Vector.h"
 #include "IOperatingSystem.h"
 
 #include <cstdlib>
