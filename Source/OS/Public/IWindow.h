@@ -26,7 +26,7 @@ typedef struct WindowInfo
 	uint32 Borderless : 1;
 } WindowInfo;
 
-C_ABI HG_OS_API bool HG_CALLDECL Window_Init(void* pWindowProcessFunc);
-C_ABI HG_OS_API bool HG_CALLDECL Window_HandleMessages();
-C_ABI HG_OS_API void HG_CALLDECL Window_Create(WindowInfo* pWindowDesc);
-C_ABI HG_OS_API void HG_CALLDECL Window_Destroy(WindowInfo* pWindowDesc);
+C_ABI HG_OS_API bool HG_CDECL Window_Init(void* pWindowProcessFunc);
+C_ABI HG_OS_API bool HG_CDECL Window_HandleMessages();
+C_ABI HG_OS_API void HG_CDECL Window_Create(WindowInfo* pWindowDesc);
+C_ABI HG_OS_API void HG_CDECL Window_Destroy(WindowInfo* pWindowDesc);

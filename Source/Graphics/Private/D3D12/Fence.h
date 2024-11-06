@@ -12,6 +12,8 @@
 namespace hg
 {
 
+class CommandQueue;
+
 class Fence
 {
 public:
@@ -23,10 +25,12 @@ public:
 	Fence& operator=(Fence&&) = delete;
 	~Fence();
 
+	void Signal(CommandQueue* pQueue, uint64 fenceValue);
+	void CPUWait(uint64 fenceValue);
+
 private:
 	RefCountPtr<ID3D12Fence> m_fence;
 	HANDLE m_completeEvent;
-	uint64 m_fenceValue;
 };
 
 }

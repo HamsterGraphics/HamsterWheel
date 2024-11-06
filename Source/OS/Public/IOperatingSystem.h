@@ -40,7 +40,7 @@ typedef struct CPUInfo
 	ISAFeatures Features;
 } CPUInfo;
 
-C_ABI HG_OS_API bool HG_CALLDECL CPU_InitInfo(CPUInfo* pInfo);
+C_ABI HG_OS_API bool HG_CDECL CPU_InitInfo(CPUInfo* pInfo);
 
 ///////////////////////////////////////////////////////////////////////////////////
 // DRAM
@@ -51,7 +51,7 @@ typedef struct DRAMInfo
 	uint64 AvailableSize;
 } DRAMInfo;
 
-C_ABI HG_OS_API bool HG_CALLDECL DRAM_InitInfo(DRAMInfo* pInfo);
+C_ABI HG_OS_API bool HG_CDECL DRAM_InitInfo(DRAMInfo* pInfo);
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Power
@@ -65,7 +65,7 @@ typedef struct PowerInfo
 	bool Padding : 6;
 } PowerInfo;
 
-C_ABI HG_OS_API bool HG_CALLDECL Power_UpdateStatus(PowerInfo* pInfo);
+C_ABI HG_OS_API bool HG_CDECL Power_UpdateStatus(PowerInfo* pInfo);
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Monitor
@@ -85,7 +85,7 @@ typedef struct MonitorInfo
 	uint32 Index;
 } MonitorInfo;
 
-C_ABI HG_OS_API bool HG_CALLDECL Monitor_InitInfo(MonitorInfo* pInfo, uint32& monitorCount);
+C_ABI HG_OS_API bool HG_CDECL Monitor_InitInfo(MonitorInfo* pInfo, uint32& monitorCount);
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Time
@@ -96,8 +96,8 @@ typedef struct TimeInfo
 	float SecondsPerCycle;
 } TimeInfo;
 
-C_ABI HG_OS_API bool HG_CALLDECL Time_Init(TimeInfo* pInfo);
-C_ABI HG_OS_API int64 HG_CALLDECL Time_QueryCounter();
+C_ABI HG_OS_API bool HG_CDECL Time_Init(TimeInfo* pInfo);
+C_ABI HG_OS_API int64 HG_CDECL Time_QueryCounter();
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Console
@@ -108,7 +108,7 @@ typedef struct ConsoleInfo
 	void* WindowHandle;
 } ConsoleInfo;
 
-C_ABI HG_OS_API bool HG_CALLDECL Console_Init(ConsoleInfo* pInfo);
+C_ABI HG_OS_API bool HG_CDECL Console_Init(ConsoleInfo* pInfo);
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Log
@@ -122,9 +122,9 @@ typedef enum LogLevel
 	LOG_LEVEL_FATAL
 } LogLevel;
 
-C_ABI HG_OS_API bool HG_CALLDECL Log_Init(ConsoleInfo* pInfo);
-C_ABI HG_OS_API void HG_CALLDECL Log_Shutdown();
-C_ABI HG_OS_API void HG_CALLDECL Log_PrintFormat(LogLevel level, const char* format, ...);
+C_ABI HG_OS_API bool HG_CDECL Log_Init(ConsoleInfo* pInfo);
+C_ABI HG_OS_API void HG_CDECL Log_Shutdown();
+C_ABI HG_OS_API void HG_CDECL Log_PrintFormat(LogLevel level, const char* format, ...);
 
 #if 1
 #define LOG_INFO(format, ...) Log_PrintFormat(LOG_LEVEL_INFO, format, __VA_ARGS__)
@@ -143,16 +143,16 @@ C_ABI HG_OS_API void HG_CALLDECL Log_PrintFormat(LogLevel level, const char* for
 ///////////////////////////////////////////////////////////////////////////////////
 // Environment Variable
 ///////////////////////////////////////////////////////////////////////////////////
-C_ABI HG_OS_API bool HG_CALLDECL EnvironmentVariable_Contains(const char* key);
-C_ABI HG_OS_API const char* HG_CALLDECL EnvironmentVariable_Get(const char* key);
-C_ABI HG_OS_API bool HG_CALLDECL EnvironmentVariable_Set(const char* key, const char* value);
+C_ABI HG_OS_API bool HG_CDECL EnvironmentVariable_Contains(const char* key);
+C_ABI HG_OS_API const char* HG_CDECL EnvironmentVariable_Get(const char* key);
+C_ABI HG_OS_API bool HG_CDECL EnvironmentVariable_Set(const char* key, const char* value);
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Module
 ///////////////////////////////////////////////////////////////////////////////////
-C_ABI HG_OS_API void* HG_CALLDECL Module_Load(const char* pFilePath);
-C_ABI HG_OS_API void HG_CALLDECL Module_Unload(void* pModule);
-C_ABI HG_OS_API void* HG_CALLDECL Module_GetFunctionAddress(void* pModule, const char* pFunctionName);
+C_ABI HG_OS_API void* HG_CDECL Module_Load(const char* pFilePath);
+C_ABI HG_OS_API void HG_CDECL Module_Unload(void* pModule);
+C_ABI HG_OS_API void* HG_CDECL Module_GetFunctionAddress(void* pModule, const char* pFunctionName);
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Thread
@@ -166,13 +166,13 @@ typedef struct ThreadInfo
 	ThreadFunction ThreadMain;
 } ThreadInfo;
 
-C_ABI HG_OS_API uint32 HG_CALLDECL Thread_GetCurrentID();
-C_ABI HG_OS_API const char* HG_CALLDECL Thread_GetCurrentName();
-C_ABI HG_OS_API void HG_CALLDECL Thread_SetCurrentName(const char* pName);
-C_ABI HG_OS_API void HG_CALLDECL Thread_Sleep(uint32 seconds);
-C_ABI HG_OS_API bool HG_CALLDECL Thread_Create(ThreadInfo* pInfo);
-C_ABI HG_OS_API void HG_CALLDECL Thread_Join(ThreadInfo* pInfo);
-C_ABI HG_OS_API void HG_CALLDECL Thread_Detach(ThreadInfo* pInfo);
+C_ABI HG_OS_API uint32 HG_CDECL Thread_GetCurrentID();
+C_ABI HG_OS_API const char* HG_CDECL Thread_GetCurrentName();
+C_ABI HG_OS_API void HG_CDECL Thread_SetCurrentName(const char* pName);
+C_ABI HG_OS_API void HG_CDECL Thread_Sleep(uint32 seconds);
+C_ABI HG_OS_API bool HG_CDECL Thread_Create(ThreadInfo* pInfo);
+C_ABI HG_OS_API void HG_CDECL Thread_Join(ThreadInfo* pInfo);
+C_ABI HG_OS_API void HG_CDECL Thread_Detach(ThreadInfo* pInfo);
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Mutex
@@ -187,10 +187,10 @@ typedef struct Mutex
 	uint32 SpinCount = 2000;
 } Mutex;
 
-C_ABI HG_OS_API bool HG_CALLDECL Mutex_Init(Mutex* pMutex);
-C_ABI HG_OS_API void HG_CALLDECL Mutex_Destroy(Mutex* pMutex);
-C_ABI HG_OS_API void HG_CALLDECL Mutex_Acquire(Mutex* pMutex);
-C_ABI HG_OS_API void HG_CALLDECL Mutex_Release(Mutex* pMutex);
+C_ABI HG_OS_API bool HG_CDECL Mutex_Init(Mutex* pMutex);
+C_ABI HG_OS_API void HG_CDECL Mutex_Destroy(Mutex* pMutex);
+C_ABI HG_OS_API void HG_CDECL Mutex_Acquire(Mutex* pMutex);
+C_ABI HG_OS_API void HG_CDECL Mutex_Release(Mutex* pMutex);
 
 #if defined(__cplusplus)
 

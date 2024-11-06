@@ -7,12 +7,14 @@
 
 #pragma once
 
-#include <vector>
+#include "Allocator.h"
+
+#include <deque>
 
 namespace hg
 {
 
 template<typename T>
-using Vector = std::vector<T>;
+using Deque = std::deque<T, STLAllocator<T>>;
 
 }

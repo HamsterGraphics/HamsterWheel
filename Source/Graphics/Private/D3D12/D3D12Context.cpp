@@ -7,10 +7,14 @@
 
 #include "D3D12Context.h"
 
-#include "Base/NameOf.h"
-#include "Containers/Vector.h"
 #include "CPUDescriptorHeap.h"
+#include "CommandQueue.h"
+#include "Fence.h"
 #include "GPUDescriptorHeap.h"
+#include "SwapChain.h"
+#include "RenderTarget.h"
+#include "Texture.h"
+
 #include "IGraphics.h"
 
 #include "D3D12MemoryAllocator/D3D12MemAlloc.h"
@@ -133,6 +137,9 @@ void Graphics_EnumAdapters(GraphicsContext* pContext, uint32* pAdapterCount, Ada
 			adapterInfo.DedicatedVRAM = adapterDesc.DedicatedVideoMemory;
 			adapterInfo.MaxFeatureLevel = featureLevelsData.MaxSupportedFeatureLevel;
 			adapterInfo.MaxShaderModel = shaderModelData.HighestShaderModel;
+
+			size_t numConverted = 0;
+			wcstombs_s(&numConverted, adapterInfo.Name, adapterDesc.Description, COUNTOF(adapterInfo.Name));
 		}
 		else
 		{
@@ -305,15 +312,36 @@ bool Graphics_Init(const GraphicsContextCreateInfo& createInfo, GraphicsContext*
 
 	Graphics_InitDescriptorHeaps(pContext);
 	Graphics_InitDefaultResources(pContext);
-	Graphics_InitCommandPool(pContext);
+	Graphics_InitCommandContext(pContext);
+
+	LOG_TRACE("Init swap chain.");
+	SwapChainDesc desc;
+	desc.BufferWidth = createInfo.BackBufferWidth;
+	desc.BufferHeight = createInfo.BackBufferHeight;
+	desc.BufferCount = MAX_FRAME_COUNT;
+	desc.NativeWindowHandle = createInfo.NativeWindowHandle;
+	desc.PresentQueue = pContext->GraphicsQueue;
+	desc.EnableVSync = true;
+	desc.ClearValue = { 1.0f, 1.0f, 1.0f, 1.0f };
+	pContext->SwapChain = new hg::SwapChain(pContext->Factory, desc);
+
+	LOG_TRACE("Init swap chain back buffer RTVs.");
+	for (uint32 bufferIndex = 0; bufferIndex < desc.BufferCount; ++bufferIndex)
+	{
+		auto rtvHandle = pContext->CPUDescriptorHeaps[D3D12_DESCRIPTOR_HEAP_TYPE_RTV]->Allocate();
+		pContext->SwapChain->CreateBackBufferRTV(pContext->Device, bufferIndex, rtvHandle);
+	}
 
 	return true;
 }
 
 void Graphics_Shutdown(GraphicsContext* pContext)
 {
+	delete pContext->SwapChain;
+	pContext->SwapChain = nullptr;
+
+	Graphics_DestroyCommandContext(pContext);
 	Graphics_DestroyDescriptorHeaps(pContext);
-	Graphics_DestroyCommandPool(pContext);
 
 #if defined(HG_GFX_ENABLE_DEBUG)
 	LOG_TRACE("Report d3d12 live objects.");
@@ -334,29 +362,65 @@ void Graphics_Shutdown(GraphicsContext* pContext)
 
 void Graphics_BeginFrame(GraphicsContext* pContext)
 {
+	ID3D12DescriptorHeap* heaps[] = {
+		pContext->GPUViewDescriptorHeap->GetHandle(),
+		pContext->GPUSamplerDescriptorHeap->GetHandle()
+	};
+	pContext->GraphicsCommandList->SetDescriptorHeaps(COUNTOF(heaps), heaps);
+
+	pContext->SwapChain->BeginFrame();
 }
 
 void Graphics_EndFrame(GraphicsContext* pContext)
 {
+	// Submit
+	//D3D12_VERIFY(pContext->GraphicsCommandList->Close());
+	//ID3D12CommandList* pCommandLists[] = { pContext->GraphicsCommandList };
+	//pContext->GraphicsQueue->GetHandle()->ExecuteCommandLists(COUNTOF(pCommandLists), pCommandLists);
+
+	// Synchronization
+	++pContext->CurrentCPUFrame;
+	pContext->FrameFence->Signal(pContext->GraphicsQueue, pContext->CurrentCPUFrame);
+	
+	Assert(pContext->CurrentCPUFrame > pContext->CurrentGPUFrame);
+	uint64 deltaFrames = pContext->CurrentCPUFrame - pContext->CurrentGPUFrame;
+	if (deltaFrames >= MAX_FRAME_COUNT)
+	{
+		pContext->FrameFence->CPUWait(pContext->CurrentGPUFrame + 1);
+		++pContext->CurrentGPUFrame;
+	}
+
 	pContext->GPUViewDescriptorHeap->EndFrame();
 	pContext->GPUSamplerDescriptorHeap->EndFrame();
+
+	pContext->SwapChain->EndFrame();
 }
 
-void Graphics_InitCommandQueue(GraphicsContext* pContext)
+void Graphics_InitCommandContext(GraphicsContext* pContext)
 {
-}
-
-void Graphics_DestroyCommandQueue(GraphicsContext* pContext)
-{
-}
-
-void Graphics_InitCommandPool(GraphicsContext* pContext)
-{
+	LOG_TRACE("Init graphics command allocator.");
 	D3D12_VERIFY(pContext->Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&pContext->CommandAllocator)));
+	
+	LOG_TRACE("Init graphics command list.");
+	ID3D12PipelineState* pInitialState = NULL;
+	D3D12_VERIFY(pContext->Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, pContext->CommandAllocator, pInitialState, IID_PPV_ARGS(&pContext->GraphicsCommandList)));
+	D3D12_VERIFY(pContext->GraphicsCommandList->Close());
+
+	LOG_TRACE("Init graphics command queue.");
+	pContext->GraphicsQueue = new hg::CommandQueue(pContext->Device, D3D12_COMMAND_LIST_TYPE_DIRECT);
+
+	pContext->FrameFence = new hg::Fence(pContext->Device);
+	pContext->CurrentCPUFrame = 0;
+	pContext->CurrentGPUFrame = 0;
 }
 
-void Graphics_DestroyCommandPool(GraphicsContext* pContext)
+void Graphics_DestroyCommandContext(GraphicsContext* pContext)
 {
+	delete pContext->GraphicsQueue;
+	pContext->GraphicsQueue = nullptr;
+
+	delete pContext->FrameFence;
+	pContext->FrameFence = nullptr;
 }
 
 ///////////////////////////////////////////////////////

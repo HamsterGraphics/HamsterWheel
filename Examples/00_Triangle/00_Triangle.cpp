@@ -20,11 +20,12 @@ public:
 		return true;
 	}
 
-	virtual bool Init() override
+	virtual bool Init(void* pNativeWindowHandle) override
 	{
 		LOG_TRACE("Init graphics module.");
 		m_graphicsContext = std::make_unique<GraphicsContext>();
 		GraphicsContextCreateInfo contextCreateInfo = {};
+		contextCreateInfo.NativeWindowHandle = pNativeWindowHandle;
 		contextCreateInfo.EnableStablePowerMode = false;
 		contextCreateInfo.Debug.EnableGPUBasedValidation = true;
 		contextCreateInfo.Debug.EnableSynchronizedCommandQueueValidation = true;

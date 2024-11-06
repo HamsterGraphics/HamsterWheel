@@ -10,10 +10,13 @@
 #include "Base/APIDefines.h"
 #include "Base/Assert.h"
 #include "Base/BasicTypes.h"
+#include "Base/NameOf.h"
 #include "Base/PlatformDefines.h"
 #include "Base/RefCountPtr.h"
+#include "STL/Vector.h"
 #include "IOperatingSystem.h"
 
+#include <cstdlib>
 #include <string>
 
 #if defined(HG_GFX_EXPORT)
@@ -39,6 +42,28 @@
 ///////////////////////////////////////////////////////
 // API Types
 ///////////////////////////////////////////////////////
+struct NullResources;
+
+namespace hg
+{
+class CPUDescriptorHeap;
+class CommandQueue;
+class GPUDescriptorHeap;
+class Fence;
+class SwapChain;
+}
+
+typedef struct SwapChainDesc
+{
+	void* NativeWindowHandle;
+	hg::CommandQueue* PresentQueue;
+	uint32 BufferCount;
+	uint32 BufferWidth;
+	uint32 BufferHeight;
+	RGBA ClearValue;
+	bool EnableVSync;
+} SwapChainDesc;
+
 typedef struct GraphicsContextCreateInfo
 {
 #if defined(HG_GFX_BACKEND_D3D12)
@@ -47,6 +72,9 @@ typedef struct GraphicsContextCreateInfo
 #if defined(HG_GFX_ENABLE_DEBUG)
 	GraphicsDebugContextCreateInfo Debug;
 #endif
+	void* NativeWindowHandle;
+	uint32 BackBufferWidth;
+	uint32 BackBufferHeight;
 
 #endif
 } GraphicsContextCreateInfo;
@@ -56,6 +84,7 @@ typedef struct GraphicsContext
 #if defined(HG_GFX_BACKEND_D3D12)
 	hg::RefCountPtr<IDXGIFactory6> Factory;
 	hg::RefCountPtr<ID3D12Device> Device;
+	hg::SwapChain* SwapChain;
 	
 	// Debug
 #if defined(HG_GFX_ENABLE_DEBUG)
@@ -75,5 +104,13 @@ typedef struct GraphicsContext
 	
 	// Command
 	hg::RefCountPtr<ID3D12CommandAllocator> CommandAllocator;
+	hg::RefCountPtr<ID3D12GraphicsCommandList1> GraphicsCommandList;
+	hg::CommandQueue* GraphicsQueue;
+
+	// Synchronization
+	hg::Fence* FrameFence;
+	uint64 CurrentCPUFrame = 0;
+	uint64 CurrentGPUFrame = 0;
+
 #endif
 } GraphicsContext;

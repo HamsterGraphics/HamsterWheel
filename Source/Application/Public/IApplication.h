@@ -54,7 +54,7 @@ class HG_APP_API IApplication
 {
 public:
 	virtual bool InitSettings() = 0;
-	virtual bool Init() = 0;
+	virtual bool Init(void* pNativeWindowHandle) = 0;
 	virtual void Shutdown() = 0;
 	virtual void Update(float deltaTime) = 0;
 	virtual void Render() = 0;

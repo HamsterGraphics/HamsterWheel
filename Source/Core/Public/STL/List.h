@@ -7,12 +7,14 @@
 
 #pragma once
 
+#include "Allocator.h"
+
 #include <list>
 
 namespace hg
 {
 
 template<typename T>
-using List = std::list<T>;
+using List = std::list<T, STLAllocator<T>>;
 
 }

@@ -6,7 +6,7 @@
  */
 
 #include "Base/TypeTraits.h"
-#include "Containers/Bitset.h"
+#include "STL/Bitset.h"
 #include "IOperatingSystem.h"
 
 #include <intrin.h>
